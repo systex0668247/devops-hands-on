@@ -18,33 +18,31 @@ initParameter() {
   # GOOGLE_ZONE
   if [ -z $GOOGLE_ZONE  ]; then
     GOOGLE_ZONE=asia-east1-a
-    echo "  未定義 GOOGLE_ZONE.         使用預設值......(GOOGLE_ZONE=$GOOGLE_ZONE)"
+    echo "  未定義 GOOGLE_ZONE.         使用預設值.......(GOOGLE_ZONE=$GOOGLE_ZONE)"
   fi
   
   # GOOGLE_GCE_NAME
   if [ -z $GOOGLE_GCE_NAME  ]; then
     GOOGLE_GCE_NAME=devops-hands-on
-    echo "  未定義 GOOGLE_GCE_NAME.     使用預設值......(GOOGLE_GCE_NAME=$GOOGLE_GCE_NAME)"
+    echo "  未定義 GOOGLE_GCE_NAME.     使用預設值.......(GOOGLE_GCE_NAME=$GOOGLE_GCE_NAME)"
   fi
 
   # GOOGLE_GCE_MACHINE
   if [ -z $GOOGLE_GCE_MACHINE  ]; then
     GOOGLE_GCE_MACHINE=n1-standard-1
-    echo "  未定義 GOOGLE_GCE_MACHINE.  使用預設值......(GOOGLE_GCE_MACHINE=$GOOGLE_GCE_MACHINE)"
+    echo "  未定義 GOOGLE_GCE_MACHINE.  使用預設值.......(GOOGLE_GCE_MACHINE=$GOOGLE_GCE_MACHINE)"
   fi
 
   # GOOGLE_GCE_IMAGE
   if [ -z $GOOGLE_GCE_IMAGE  ]; then
     GOOGLE_GCE_IMAGE=centos-7
-    echo "  未定義 GOOGLE_GCE_IMAGE.    使用預設值......(GOOGLE_GCE_IMAGE=$GOOGLE_GCE_IMAGE)"
+    echo "  未定義 GOOGLE_GCE_IMAGE.    使用預設值.......(GOOGLE_GCE_IMAGE=$GOOGLE_GCE_IMAGE)"
   fi
 
   read -p "確認開始安裝(Y/n)?" yn
-  if [ "${yn}" == "" ]||[[ "${yn}" =~ ^[Yy] ]]; then
-
-  else
-    exit 0
-  fi
+  case $yn in
+      [Nn]* ) echo "動作取消 "; exit;;
+  esac  
 }
 
 # 建立全新的 GCP Project 
@@ -79,7 +77,7 @@ createComputeEngine() {
   printf "  尋找映像檔($GOOGLE_GCE_IMAGE)專案路徑..."
   GOOGLE_GCE_IMAGES_LIST=$(gcloud compute images list | grep "${GOOGLE_GCE_IMAGE}" | awk -F" " '{print $1 "," $2}')
   GOOGLE_GCE_IMAGE=$(echo ${GOOGLE_GCE_IMAGES_LIST} | awk -F"," '{print $1}')
-  GOOGLE_GCE_IMAGE_PROJECT=$(echo ${GC_COMPUTE_IMAGES_LIST} | awk -F"," '{print $2}')
+  GOOGLE_GCE_IMAGE_PROJECT=$(echo ${GOOGLE_GCE_IMAGES_LIST} | awk -F"," '{print $2}')
   echo "($GOOGLE_GCE_IMAGE_PROJECT/$GOOGLE_GCE_IMAGE)"
 
   printf "  開始建立VM($GOOGLE_GCE_NAME)..."
@@ -98,7 +96,8 @@ createComputeEngine() {
     --boot-disk-device-name=GCE-$GOOGLE_GCE_NAME \
     --tags=http-server,https-server \
     --scopes=https://www.googleapis.com/auth/devstorage.read_only,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring.write,https://www.googleapis.com/auth/servicecontrol,https://www.googleapis.com/auth/service.management.readonly,https://www.googleapis.com/auth/trace.append \
-    > /dev/null 2>&1 && echo "完成"
+    > /dev/null 2>&1 && \
+    echo "完成"
     
   printf "  設定firewall(80/443)..."  
   gcloud compute --project=$GOOGLE_PROJECT_ID firewall-rules create default-allow-http --direction=INGRESS --priority=1000 --network=default --action=ALLOW --rules=tcp:80 --source-ranges=0.0.0.0/0 --target-tags=http-server > /dev/null 2>&1 && \
