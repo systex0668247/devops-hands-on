@@ -37,7 +37,7 @@ initParameter() {
   if [ -z $GOOGLE_GCE_IMAGE  ]; then
     GOOGLE_GCE_IMAGE=centos-7
     echo "  未定義 GOOGLE_GCE_IMAGE.    使用預設值......(GOOGLE_GCE_IMAGE=$GOOGLE_GCE_IMAGE)"
-  f
+  fi
 
   read -p "確認開始安裝(Y/n)?" yn
   if [ "${yn}" == "" ]||[[ "${yn}" =~ ^[Yy] ]]; then
