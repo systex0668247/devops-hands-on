@@ -3,6 +3,20 @@
 # 安裝 Lab 課程環境
 ###
 
+# 設定參數
+initParameter() {
+  # GOOGLE_PROJECT_ID
+  if [ -z $GOOGLE_PROJECT_ID  ]; then
+    GOOGLE_PROJECT_ID=systex-lab-$(cat /proc/sys/kernel/random/uuid | cut -b -6)
+    echo "未定義 GOOGLE_PROJECT_ID. 由系統自動產生...(GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID)" 
+  fi
+  
+  # GOOGLE_ZONE
+  if [ -z $GOOGLE_ZONE  ]; then
+    GOOGLE_ZONE=asia-east1-a
+    echo "未定義 GOOGLE_ZONE. 由預設使用台灣($GOOGLE_ZONE)"
+  fi
+}
 
 # 建立獨立的 GCP Project 
 createProject() {
@@ -19,19 +33,11 @@ createProject() {
   gcloud beta billing projects link $GOOGLE_PROJECT_ID --billing-account $GOOGLE_BILLING_ACCOUNT
 }
 
-#Stop execution on any error
-trap "fail_trap" EXIT
-set -e
 
-# Parsing input arguments (if any)
-export INPUT_ARGUMENTS="${@}"
-#set -u
 
-set +u
-
-if [ -z $GOOGLE_PROJECT_ID  ]; then
-  echo "未定義 GOOGLE_PROJECT_ID. 由系統自動產生."
-  GOOGLE_PROJECT_ID=systex-lab-$(cat /proc/sys/kernel/random/uuid | cut -b -6)
-fi
-
-createProject
+initParameter
+#createProject
+cat <<EOF
+GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID
+GOOGLE_ZONE=$GOOGLE_ZONE
+EOF
