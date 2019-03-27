@@ -13,18 +13,24 @@ initParameter() {
   if [ -z $GOOGLE_PROJECT_ID  ]; then
     GOOGLE_PROJECT_ID=systex-lab-$(cat /proc/sys/kernel/random/uuid | cut -b -6)
     echo "  未定義 GOOGLE_PROJECT_ID.   由系統自動產生...(GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID)" 
+  else
+    echo "  系統參數 GOOGLE_PROJECT_ID 已設定...........(GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID)" 
   fi
   
   # GOOGLE_ZONE
   if [ -z $GOOGLE_ZONE  ]; then
     GOOGLE_ZONE=asia-east1-a
     echo "  未定義 GOOGLE_ZONE.         使用預設值.......(GOOGLE_ZONE=$GOOGLE_ZONE)"
+  else
+    echo "  系統參數 GOOGLE_ZONE 已設定................(GOOGLE_ZONE=$GOOGLE_ZONE)" 
   fi
   
   # GOOGLE_GCE_NAME
   if [ -z $GOOGLE_GCE_NAME  ]; then
     GOOGLE_GCE_NAME=devops-hands-on
     echo "  未定義 GOOGLE_GCE_NAME.     使用預設值.......(GOOGLE_GCE_NAME=$GOOGLE_GCE_NAME)"
+  else
+    echo "  系統參數 GOOGLE_GCE_NAME 已設定.............(GOOGLE_GCE_NAME=$GOOGLE_GCE_NAME)" 
   fi
 
   # GOOGLE_GCE_MACHINE
