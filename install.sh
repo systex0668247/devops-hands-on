@@ -130,10 +130,21 @@ EOF
 cat /tmp/my-environments >> ~/.bashrc
 EOF
 
-  gcloud compute ssh --project=$GOOGLE_PROJECT_ID --zone=$GOOGLE_ZONE systex@$GOOGLE_GCE_NAME
 }
 
 initParameter
 createProject
 createComputeEngine
 connectVM
+
+cat <<EOF
+----------------------------------------
+環境安裝完成
+----------
+GCP 專案名稱: $GOOGLE_PROJECT_ID
+GCP 地區    : $GOOGLE_ZONE
+GCP VM  名稱: $GOOGLE_GCE_NAME
+----------------------------------------
+EOF
+
+gcloud compute ssh --project=$GOOGLE_PROJECT_ID --zone=$GOOGLE_ZONE systex@$GOOGLE_GCE_NAME
