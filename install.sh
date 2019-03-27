@@ -80,7 +80,7 @@ createComputeEngine() {
   GOOGLE_GCE_IMAGE_PROJECT=$(echo ${GOOGLE_GCE_IMAGES_LIST} | awk -F"," '{print $2}')
   echo "($GOOGLE_GCE_IMAGE_PROJECT/$GOOGLE_GCE_IMAGE)"
 
-  printf "  開始建立VM($GOOGLE_GCE_NAME)..."
+  printf "  開始建立 VM($GOOGLE_GCE_NAME)..."
   gcloud compute --project=$GOOGLE_PROJECT_ID \
     instances create $GOOGLE_GCE_NAME \
     --zone=$GOOGLE_ZONE \
@@ -104,12 +104,36 @@ createComputeEngine() {
   gcloud compute --project=$GOOGLE_PROJECT_ID firewall-rules create default-allow-https --direction=INGRESS --priority=1000 --network=default --action=ALLOW --rules=tcp:443 --source-ranges=0.0.0.0/0 --target-tags=https-server > /dev/null 2>&1 && \
   echo "完成"
 
+  printf "  等待 VM 啟動中..."
+  sleep 10
+  echo "完成"
+}
+
+# 連線至VM及設定
+connectVM() {
+  echo "連線至 VM 設定中..."
+
+
+  printf "  VM SSH連線金鑰產生中..."
+gcloud compute ssh --project=$GOOGLE_PROJECT_ID --zone=$GOOGLE_ZONE systex@$GOOGLE_GCE_NAME <<EOF > /dev/null 2>&1 && echo "完成"
+ls
+EOF
+
+  printf "  儲存環境變數至 VM... "
+cat<<EOF >> ./my-environments
+GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID
+GOOGLE_ZONE=$GOOGLE_ZONE
+GOOGLE_GCE_NAME=$GOOGLE_GCE_NAME
+EOF
+  gcloud compute scp ./my-environments --project=$GOOGLE_PROJECT_ID --zone=$GOOGLE_ZONE systex@$GOOGLE_GCE_NAME:/tmp > /dev/null 2>&1 && \
+  gcloud compute ssh --project=$GOOGLE_PROJECT_ID --zone=$GOOGLE_ZONE systex@$GOOGLE_GCE_NAME <<EOF > /dev/null 2>&1 && echo "完成"
+cat /tmp/my-environments >> ~/.bashrc
+EOF
+
+  gcloud compute ssh --project=$GOOGLE_PROJECT_ID --zone=$GOOGLE_ZONE systex@$GOOGLE_GCE_NAME
 }
 
 initParameter
 createProject
 createComputeEngine
-cat <<EOF
-GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID
-GOOGLE_ZONE=$GOOGLE_ZONE
-EOF
+connectVM
