@@ -145,6 +145,10 @@ createProject
 createComputeEngine
 connectVM
 
+cat <<EOF > login.sh
+gcloud compute ssh --project=$GOOGLE_PROJECT_ID --zone=$GOOGLE_ZONE systex@$GOOGLE_GCE_NAME
+EOF
+
 cat <<EOF
 ----------------------------------------
 環境安裝完成
@@ -155,6 +159,6 @@ GCP VM  名稱: $GOOGLE_GCE_NAME
 
 執行以下指令登入 VM
 -----------------
-gcloud compute ssh --project=\$GOOGLE_PROJECT_ID --zone=\$GOOGLE_ZONE systex@\$GOOGLE_GCE_NAME
+gcloud compute ssh --project=$GOOGLE_PROJECT_ID --zone=$GOOGLE_ZONE systex@$GOOGLE_GCE_NAME
 ----------------------------------------
 EOF
