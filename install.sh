@@ -131,8 +131,7 @@ GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID
 GOOGLE_ZONE=$GOOGLE_ZONE
 GOOGLE_GCE_NAME=$GOOGLE_GCE_NAME
 EOF
-  cat ./my-environments >> ~/.bashrc
-  export $(cat ./my-environments | xargs)
+
   gcloud compute scp ./my-environments --project=$GOOGLE_PROJECT_ID --zone=$GOOGLE_ZONE systex@$GOOGLE_GCE_NAME:/tmp > /dev/null 2>&1 && \
   gcloud compute ssh --project=$GOOGLE_PROJECT_ID --zone=$GOOGLE_ZONE systex@$GOOGLE_GCE_NAME <<EOF > /dev/null 2>&1 && echo "完成"
 cat /tmp/my-environments >> ~/.bashrc
