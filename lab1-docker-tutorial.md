@@ -25,7 +25,7 @@
 
 * Google Cloud Platform
 
-    登入 GCP 在 Google Cloud Shell 下輸入以下指令
+    登入 GCP 在 Google Cloud Shell 下輸入以下指令，約需 3min
 
 ```
 bash <(curl -L http://tiny.cc/systex-devops01-install)
@@ -57,7 +57,7 @@ docker run hello-world
 
 ### 從 GitHub clone Lab 原始碼
 
-使用以下命令從GitHub clone Lab的原始碼。
+拷貝以下命令從GitHub clone Lab的原始碼。
 
 ```
 cd ~
@@ -127,7 +127,7 @@ docker ps --all
 
 ---
 
-## 在 Ubuntu 容器運行 Interactively 容器
+## 在 Ubuntu 容器運行 Interactively 容器 ##
 
 您可以使用 Docker 運行不同版本 Linux，例如在下方示例中，我們將在CentOS Linux 主機上運行Ubuntu Linux容器
 
@@ -143,7 +143,7 @@ docker run --interactive --tty --rm ubuntu bash
 `--tty` 分配一個偽tty。
 `--rm` 告訴Docker在完成執行後，移除容器。
 
-前兩個參數允許您與Docker容器進行互動，我們還告訴容器以`bash`作為主要 process（PID 1）。當容器啟動時，您將使用bash shell進入容器內  `root@<container id>:/# `
+前兩個參數允許您與Docker容器進行互動，我們還告訴容器以`bash`作為主要 process（PID 1）。當容器啟動時，您將使用bash shell進入容器內 
 
 在容器中執行以下指令。
 
@@ -151,7 +151,13 @@ docker run --interactive --tty --rm ubuntu bash
 
 ```
 ls /
+```
+
+```
 ps aux
+```
+
+```
 cat /etc/issue
 ```
 
@@ -178,7 +184,7 @@ Kernel \r on an \m
 
 請注意，我們的VM主機正在運作的是 CentOS Linux，但我們能夠運行不同發行版本的 Ubuntu 容器。
 
-但是，Linux容器需要Docker主機運行Linux內核。例如，Linux容器無法直接在Windows主機上運行。Windows容器也是如此 - 它們需要在具有Windows內核的Docker主機上運行。
+但是，Linux容器需要Docker主機運行Linux內核。例如，Linux容器無法直接在Windows主機上運行。Windows容器也是如此，它們需要在具有Windows內核的Docker主機上運行。
 
 當您將自己的圖像放在一起時，交互式容器非常有用。您可以運行容器並驗證部署應用程序所需的所有步驟，並在Dockerfile中捕獲它們。
 
@@ -204,7 +210,7 @@ docker run \
 `--name` 將它命名為mydb。
 `-e` 將使用環境變量來指定root密碼
 
-由於MySQL映像在本地端不存在，Docker會自動至Docker Hub中拉取映像檔。
+由於MySQL映像在本地端不存在，Docker會自動至Docker Hub中拉取映像檔。運行的過程會類似下方
 
 ```
  Unable to find image 'mysql:latest' locallylatest: Pulling from library/mysql
@@ -224,7 +230,7 @@ docker run \
  41d6157c9f7d1529a6c922acb8167ca66f167119df0fe3d86964db6c0d7ba4e0
 ```
 
-只要MySQL進程正在運行，Docker就會讓容器在後台運行。
+只要MySQL正在運行，Docker就會讓容器在後台運行。
 
 列出正在 __運行中__ 的容器。
 
@@ -259,7 +265,7 @@ Initializing database
 docker top mydb
 ```
 
-您應該看到MySQL守護程序（mysqld）正在容器中運行。
+您應該看到MySQL程序（mysqld）正在容器中運行。
 
 ```
 UID                 PID                 PPID                C                   STIME               TTY                 TIME                CMD
@@ -325,8 +331,203 @@ ubuntu              latest              94e814e2efa8        2 weeks ago         
 alpine              latest              5cb3aa00f899        2 weeks ago         5.53MB
 ```
 
-* 要如何刪除本地端 repo 的映像檔？
+* __問題：__ 要如何刪除本地端 repo 的映像檔？
 
 > 提示：請試著看 docker help
 
 ---
+
+## Task 2: 構建一個簡單的 Hello World 網站映像檔
+
+在接下來兩個Task中，您將學習如何使用 Dockerfile 將自己的應用程序打包為 Docker 映像檔。
+
+Dockerfile語法很簡單。在這項任務中，我們將從Dockerfile創建一個簡單的 python 網頁站台
+
+## 建立 Dockerfile
+
+讓我們看一下我們將要使用的Dockerfile，它構建了一個允許您發送推文的簡單網站。
+
+1. 請確認您在正在的目錄中
+
+```
+cd ~/devops-hands-on/sample/hello
+```
+
+2. 顯示Dockerfile的內容
+
+```
+cat Dockerfile
+```
+
+```
+ FROM python:alpine
+ COPY . /app
+ WORKDIR /app
+ RUN pip install -r requirements.txt
+ ENTRYPOINT ["python"]
+ CMD ["app.py"]
+```
+
+讓我們看看Dockerfile中的每一行是做什麼的。
+
+  `FROM` 指定要用作您正在創建的新映像檔的來源映像。本示例中，我們使用的是 `python:alpine`。
+  `COPY` 將文件從Docker主機複製到已知位置的映像中。在此示例中，COPY用於將目錄 `~/devops-hands-on/sample/hello` 下的所有檔案，拷貝一份至映像中，映像檔內路徑為 `/app`
+  `WORKDIR` 指令用於設置Dockerfile中的`RUN`、`CMD`和`ENTRYPOINT`指令的工作錄(預設為 `/` )，該指令在Dockerfile文件中可以出現多次。
+  `RUN` 指令會執行指定的命令，本示例會在 `WORKDIR` 中找尋檔案 `requirements.txt` 依內容安裝 python 套件
+  `ENTRYPOINT` 指定從映像啟動容器時要運行的命令，如果有多個 `ENTRYPOINT` 指令，那只有最後一個生效；通常用來設置不會變化的指令，例如啟動服務 (mysqld)。本示例中為呼叫 `python` 
+  `CMD` 指定從映像啟動容器時要運行的命令。如果有多個 `CMD` 指令，那只有最後一個生效；通常用來設置參數類的項目。本示例中是將檔案 `app.py` 作為參數送入 `python` 命令執行
+
+`ENTRYPOINT` 與 `CMD` 之間的差異比較難理解，但可運作的 `Dockerfile` 最少需要設置一個 `ENTRYPOINT` 或 `CMD` 。此項目我們會在下一個 Task 中進行。
+
+## 建立映像檔
+
+使用 `docker build` 命令，依照 `Dockerfile` 中的指令，建立新的Docker映像檔。
+
+  `-t` 允許我們為映像檔提供自定義名稱。
+  `.` 告訴 Docker 使用當前目錄
+
+  __請務必在命令末尾包含句點 `.`__
+
+```
+docker build -t myapp:v1 .
+```
+
+下面輸出的是 `docker build` 的過程，仔細觀察， Dockerfile 中有幾個指令，過程中就會有多少 `Step`
+
+```
+Sending build context to Docker daemon   5.12kB
+Step 1/6 : FROM python:alpine
+ ---> a93594ce93e7
+Step 2/6 : COPY . /app
+ ---> 81dba3fb41bd
+Step 3/6 : WORKDIR /app
+ ---> Running in c76b3d70a1fb
+Removing intermediate container c76b3d70a1fb
+ ---> e619e172e462
+Step 4/6 : RUN pip install -r requirements.txt
+ ---> Running in 278eaa81cb6a
+Removing intermediate container 278eaa81cb6a
+ ---> bb386e897fe3
+Step 5/6 : ENTRYPOINT ["python"]
+ ---> Running in 8c43740a9ad5
+Removing intermediate container 8c43740a9ad5
+ ---> bf2c1328976f
+Step 6/6 : CMD ["app.py"]
+ ---> Running in bee171a4b18a
+Removing intermediate container bee171a4b18a
+ ---> 1b357fd7120f
+Successfully built 1b357fd7120f
+Successfully tagged myapp:v1
+```
+
+我們要試試看，如果相同的指令，再度執行一次會發生什麼情況
+
+```
+docker build -t myapp:v1 .
+```
+
+仔細觀察輸出內容，這次的結果會相當快速完成
+
+```
+Sending build context to Docker daemon   5.12kB
+Step 1/6 : FROM python:alpine
+ ---> a93594ce93e7
+Step 2/6 : COPY . /app
+ ---> Using cache
+ ---> 81dba3fb41bd
+Step 3/6 : WORKDIR /app
+ ---> Using cache
+ ---> e619e172e462
+Step 4/6 : RUN pip install -r requirements.txt
+ ---> Using cache
+ ---> bb386e897fe3
+Step 5/6 : ENTRYPOINT ["python"]
+ ---> Using cache
+ ---> bf2c1328976f
+Step 6/6 : CMD ["app.py"]
+ ---> Using cache
+ ---> 1b357fd7120f
+Successfully built 1b357fd7120f
+Successfully tagged myapp:v1
+```
+
+你會發現大多的項目都出現了 `---> Using cache`，如果你的 Dockerfile 並沒有修改，前一次進行的動作就會被快取
+
+輸入以下指令，確認本地端 repository 狀況
+
+```
+docker images
+```
+
+你會看到剛剛所建立的 `myapp:v1` 已經在本地端 repository 內了 
+
+```
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+myapp               v1                  8023671c6799        15 seconds ago      101MB
+```
+
+## 運行映像檔
+
+使用 `docker run` 命令，運行您創建的映像檔啟動新容器。
+
+```
+docker run -d -p 5000:5000 myapp:v1
+```
+
+簡單的說明一下指令參數的作用
+  `-d` 在背景模式下運行此容器
+  `-p 5000:5000` 將容器內的通訊埠5000(右側)，發佈到主機上的通訊埠5000(左側)
+
+接著你可以使用 `docker ps` 指令觀察運行中的容器狀態，為了測試服務運作是否正常，輸入以下指令
+
+```
+curl localhost:5000
+```
+
+你的畫面應該要看到輸出結果如下 
+
+```
+Hello World!!!
+```
+
+如果看到 Hello World，恭喜你已成功的建立第一個容器服務。
+
+---
+
+## 課堂練習-02
+
+現在你有一個容器正在運行中，你可以用 `docker ps` 來找尋運行中的容器清單，類似下方輸出結果。目前你應該有一個容器正在運行中
+
+```
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS                    NAMES
+b8375e3ded63        f97dc95a465e        "python app.py"     2 hours ago         Up 2 hours          0.0.0.0:5000->5000/tcp   optimistic_wu
+```
+
+* __問題：__ 要如何中止容器？
+
+> 提示：請試著看 docker help
+
+
+---
+
+---
+
+## Task 3: 
+
+
+## Push your images to GCR (Google Container Repository)
+
+輸入以
+
+啟用 `Google Container Repository API` 服務
+
+```
+gcloud services enable containerregistry.googleapis.com
+```
+
+如果您未啟用 GCR API 你會看到以下的錯誤，若您看到此錯誤，請重新執行以上指令碼 
+
+```
+denied: Token exchange failed for project 'systex-lab-f7c658'. Please enable Google Container Registry API in Cloud Console at https://console.cloud.google.com/apis/api/containerregistry.googleapis.com/overview?project=systex-lab-f7c658 before performing this operation.
+```
+
