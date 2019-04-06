@@ -1,6 +1,6 @@
 # Docker for Beginners - Linux
 
-在本實驗中，我們將介紹一些基本的Docker命令和一個簡單的構建運行工作流程。我們首先運行一些簡單的容器，然後我們將使用Dockerfile來構建自定義應用程序。最後，我們將看看如何使用綁定掛載修改正在運行的容器，如果您正在使用Docker進行積極開發的話。
+在本實驗中，我們將先介紹一些基本的Docker命令。首先運行一些簡單的容器，然後我們將使用Dockerfile來構建自定義應用程式。最後，我們將自定義的映像檔，上傳至Google Container Repository中。
 
 ---
 
@@ -8,8 +8,8 @@
 
 * Task 0：環境建置
 * Task 1：運行一些簡單的Docker容器
-* Task 2：使用Docker打包並運行自定義應用程序
-* Task 3：修改正在運行的網站
+* Task 2：構建一個簡單的 Hello World 網站映像檔
+* Task 3：更多 Dockerfile 常用指令練習
 
 > 請盡可能自行輸入指令，增加印象
 
@@ -42,6 +42,7 @@ sudo su
 在您首次登入虛擬機，或尚未安裝 Docker 請依照以下指示執行
 
 拷貝以下指令，貼上虛擬機命令列上執行 
+
 ```
 yum install -y yum-utils device-mapper-persistent-data lvm2
 yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
@@ -507,15 +508,178 @@ b8375e3ded63        f97dc95a465e        "python app.py"     2 hours ago         
 
 > 提示：請試著看 docker help
 
+---
+
+## Task 3: 更多 Dockerfile 常用指令練習
+
+這個 Task 的內容，我們將不斷的練習重新改造 Dockerfile，檢視各個重要基礎指令的使用方式
+
+在開始之前，以下內容都會在 Linux 命令列上進行檔案的編修，如果您並不熟悉 Linux shell 指令操作，強烈建議您先閱讀[鳥哥的Linux > vim 程式編輯器](http://linux.vbird.org/linux_basic/0310vi.php#vi_ex)
+
+## EXPOSE
+
+`EXPOSE` 指令，會宣告你的容器對外有那些通訊埠開啟，但此設定並不會對外服務，你還是要透過 `docker run -p` 的方式才能讓容器的通訊埠對外發佈服務
+
+修改您的 Dockerfile 
+
+```
+vi Dockerfile
+```
+
+增加 EXPOSE 宣告，我們宣告開啟 `EXPOSE 5000`，加入Dockerfile 位置參考如下，並記得存檔再離開
+
+```
+FROM python:alpine
+
+COPY . /app
+WORKDIR /app
+
+RUN pip install -r requirements.txt
+
+EXPOSE 5000
+
+ENTRYPOINT ["python"]
+CMD ["app.py"]
+```
+
+完成後，我們要將修改的內容重新建立，並更換版本代碼至 `v2`
+
+```
+docker build -t myapp:v2 . 
+```
+
+現在我們可以同時啟動兩個不同版本的 `myapp` 比較差異
+
+```
+docker run -d myapp:v1
+docker run -d myapp:v2 
+```
+
+你可以發現 `v2` 版本有宣告 `EXPOSE` 較 `v1` 多了  `5000/tcp` 的內容，但此時兩個容器都無法對外提供服務
+
+```
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+45ff6b03b162        myapp:v2            "python app.py"     4 seconds ago       Up 3 seconds        5000/tcp            competent_dubinsky
+af5ea393185c        myapp:v1            "python app.py"     6 seconds ago       Up 5 seconds                            blissful_gauss
+```
+
+使用 `EXPOSE` 指令，可指令 `docker run` 可搭配 `-P` 使用，Docker 主機會隨機分配對外通信埠與容器所宣告的對外埠連接 
+
+```
+docker run -d -P myapp:v2
+```
+
+觀察 `docker ps` 現在我們有三個容器運行中，其中有一個容器有連接對外服務 `0.0.0.0:32769`
+
+```
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS                     NAMES
+72346620f65c        myapp:v2            "python app.py"     3 seconds ago       Up 1 second         0.0.0.0:32769->5000/tcp   boring_austin
+45ff6b03b162        myapp:v2            "python app.py"     5 minutes ago       Up 5 minutes        5000/tcp                  competent_dubinsky
+af5ea393185c        myapp:v1            "python app.py"     5 minutes ago       Up 5 minutes                                  blissful_gauss
+```
+
+簡易測試運作是否正常的，這時的通訊埠要指定至隨機分配的埠，成功你應該可看到 `Hello World!!!`
+
+```
+curl localhost:32769
+```
+
+不論你是否有宣告 `EXPOSE` ，其實仍然可以使用 `docker run -p` 直接指定通訊埠的分配
+
+你可以先中止已啟動的容器，再進入下一步。
+
+## ENTRYPOINT 與 CMD
+
+前一個 Task 中，我們有使用到 `ENTRYPOINT` 與 `CMD` ，兩個指令的特性都是在啟動容器時運行指令，而且只有最後一次宣告的會生效，唯一差別只有 `ENTRYPOINT` 不能被替換，而 `CMD` 則是可以被替換的
+
+為了測試這個特性，我們要試著改變 `CMD` 的內容，但不修改 `Dockerfile` ，先觀察目前 `Dockerfile` 的內容 
+
+```
+FROM python:alpine
+
+COPY . /app
+WORKDIR /app
+
+RUN pip install -r requirements.txt
+
+EXPOSE 5000
+
+ENTRYPOINT ["python"]
+CMD ["app.py"]
+```
+
+`CMD` 中所指定的是一個檔案，接著我們要在啟動的過程中，替換 `app.py` 改執行其它應用程式
+
+```
+docker run -d -p 5000:5000 myapp:v2 replace.py
+```
+
+簡易測試運作是否正常的
+
+```
+curl localhost:5000
+```
+
+成功你應該可看到 `Replaced Hello World~~~`
+
+## VOLUME
+
+<<說明>>
+
+修改您的 Dockerfile 
+
+```
+vi Dockerfile
+```
+
+增加 `VOLUME` 宣告，我們將目錄 `/app/logs` 建立成為 Volume，並預設啟動程式 `app.py` 替換為 `replace.py`，最終結果應該如下
+
+```
+FROM python:alpine
+
+COPY . /app
+WORKDIR /app
+
+RUN pip install -r requirements.txt
+
+VOLUME /app/logs
+
+EXPOSE 5000
+
+ENTRYPOINT ["python"]
+CMD ["replace.py"]
+``` 
+
+完成後，我們要將修改的內容重新建立，並更換版本代碼至 `v3`
+
+```
+docker build -t myapp:v3 . 
+```
+
+接著將容器啟動
+
+```
+docker run -d -p 5000:5000 myapp:v3
+```
+
+輸入以下指令，查看目前所有存在的 volume
+
+```
+docker volume ls
+```
+
+你會發現 Docker 自動建立了一個 Volume
+
+```
+DRIVER              VOLUME NAME
+local               6fd268fb52b198cfd2d1d61b7d3ab7a9a3b2d60dceef4c613d8e6628336782dc
+```
+
+
 
 ---
 
----
-
-## Task 3: 
-
-
-## Push your images to GCR (Google Container Repository)
+## Task 4: Push your images to GCR (Google Container Repository)
 
 輸入以
 
