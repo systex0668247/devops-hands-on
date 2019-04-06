@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class HelloWorld {
 
     @GetMapping(path="/")
-    public String hello()
+    public String hello() throws Exception
     {
-        return "123";
+        return System.getenv("HOSTNAME");
     }
 }

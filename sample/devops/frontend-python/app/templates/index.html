@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+<!--css-->
+{% block css %}
+<style>
+body{
+    background:#ffffff;
+    color:#000000;
+}
+</style>
+{% endblock %}
+
+
+<!--js-->
+{% block js %}
+<script type="text/javascript"> 
+var app_location = document.location.origin;
+var socket;
+
+// on page ready
+$(document).ready(function() {
+   
+  //on ajax call success
+  var onSuccess = function(result){
+    // add counter
+    $(this).attr("counter", parseInt($(this).attr("counter"))+1 ) 
+    $(this).parent().find('.logging').prepend($("<div>" +$(this).attr("counter")+": " + result + "</div>"))
+    $(this).parent().find('.logging div:gt(20)').remove();
+  }
+
+  $('.btn-backend').click(function(){
+    $.ajax({
+      url: '/' + $(this).attr("data")
+      , cache: false
+      , context: this
+      , success: onSuccess
+    })
+  });
+
+  // add counter on html attribute
+  $('.btn-backend').each(function(index){
+    $(this).attr("counter","0")
+  })
+
+  // call each backend service every 0.5 sec
+  $('.btn-backend').each(function(index){
+    var that = this;
+    setInterval(function(){
+      that.click()
+    },500);
+  })
+});
+
+</script>
+{% endblock %}
+
+<!--content-->
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col" id="frontend-python">
+      <button type="button" class="btn btn-primary">frontend-python</button>
+      <hr />
+      <div class="logging"></div>
+    </div>
+    <div class="col" id="backend-java">
+      <button type="button" class="btn btn-danger btn-backend" data="backend-java">backend-java</button>
+      <hr />
+      <div class="logging"></div>
+    </div>
+    <div class="col" id="backend-php">
+      <button type="button" class="btn btn-success btn-backend" data="backend-php">backend-php</button>
+      <hr />
+      <div class="logging"></div> 
+    </div>
+  </div>
+</div>
+{% endblock %}

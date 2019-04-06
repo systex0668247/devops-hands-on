@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="MSO">
+        <title>{{title}}</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-grid.min.css') }}">
+
+		<!-- css block ================================================== -->
+        {% block css %}        
+        {% endblock %}
+    </head>
+
+    <body>
+        <div class="">
+        
+        	<!-- content block ================================================== -->
+            {% block content %}
+            {% endblock %}
+        </div>
+
+		
+        <!-- Bootstrap core JavaScript -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-1.11.1.min.js') }}"></script>
+        <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+        
+		<!-- js block ================================================== -->
+        {% block js %}
+        {% endblock %}
+    </body>
+</html>
