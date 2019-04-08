@@ -10,6 +10,7 @@
 * Task 1：運行一些簡單的Docker容器
 * Task 2：構建一個簡單的 Hello World 網站映像檔
 * Task 3：更多 Dockerfile 常用指令練習
+* Task 4：發佈至公開的 Container Repository 
 
 > 請盡可能自行輸入指令，增加印象
 
@@ -739,11 +740,11 @@ INFO:root:f7cd97856867
 
 ---
 
-## Task 4: Push your images to GCR (Google Container Repository)
+## Task 4: 發佈至公開的 Container Repository 
 
-輸入以
+本階段會演示如何將你的映像檔(docker image)，推送至公開的 container repository 中。
 
-啟用 `Google Container Repository API` 服務
+以下示例，我們使用了 Google Container Repository(GCR) 作為公開 repo。要使用 GCR，首先要啟用 `Google Container Repository API` 服務，輸入以下指令可協助你在命令列上啟用。
 
 ```
 gcloud services enable containerregistry.googleapis.com
@@ -755,3 +756,95 @@ gcloud services enable containerregistry.googleapis.com
 denied: Token exchange failed for project 'systex-lab-f7c658'. Please enable Google Container Registry API in Cloud Console at https://console.cloud.google.com/apis/api/containerregistry.googleapis.com/overview?project=systex-lab-f7c658 before performing this operation.
 ```
 
+接著我們要取得 GCR 的授權，我們可以透過 gcloud 工具的協助取得
+
+```
+gcloud docker
+```
+
+以上指令並沒有任何結果產生，但會取得 GCR 授權，自動寫入 `.dockercfg` 中，以下指令可以檢視取的授權的資料
+
+```
+cat ~/.dockercfg 
+```
+
+接下來的動作，如果你有碰到授權的問題如下，你應該重新執行以上過程
+
+```
+unauthorized: You don't have the needed permissions to perform this operation, and you may have invalid credentials. To authenticate your request, follow the steps in: https://cloud.google.com/container-registry/docs/advanced-authentication
+```
+
+在 Task-3 中，最後我們產出了一個映像檔 `myapp:v3` ，現在我們要將這個映像檔推送至 GCR。如果你沒有 `myapp:v3` 也沒關係，你可以任何取得一個映像檔，例如 `docker pull alpine` 代替 `myapp:v3` 。
+
+首先我們要找到 `myapp:v3` 映像檔的 `IMAGE ID`，輸入以下指令
+
+```
+docker images
+```
+
+你會看到類似輸出結果
+
+```
+REPOSITORY                       TAG                 IMAGE ID            CREATED             SIZE
+myapp                            v3                  1be5907b8113        6 hours ago         101MB
+myapp                            v2                  51af0daf01f8        7 days ago          101MB
+myapp                            v1                  44e4ed120fbe        7 days ago          101MB
+```
+
+在此示範中， `myapp:v3` 的 IMAGE ID 是 `1be5907b8113`
+
+上傳至 GCR 的路徑中，必需包含你目前操作的專案名稱，為以下操作便利，先將專案名稱存至環境變數中，執行以下命令
+
+```
+GOOGLE_PROJECT_ID=$(gcloud config get-value project)
+```
+
+* _`$(gcloud config get-value project)` 是取得你目前 Google Cloud Platform 中的 Project 名稱_ 
+
+接下來，要使用 `docker tag` 指令，將公開的repo位置加入映像檔名稱中，並對應到一個已存在的映像檔
+
+```
+docker tag 1be5907b8113 gcr.io/$GOOGLE_PROJECT_ID/myapp:v3
+```
+
+
+
+再次輸入 `docker images` 如下
+
+```
+REPOSITORY                       TAG                 IMAGE ID            CREATED             SIZE
+myapp                            v3                  1be5907b8113        6 hours ago         101MB
+gcr.io/systex-lab-7093cf/myapp   v3                  1be5907b8113        6 hours ago         101MB
+myapp                            v2                  51af0daf01f8        7 days ago          101MB
+myapp                            v1                  44e4ed120fbe        7 days ago          101MB
+```
+
+你會看到多了一個映像檔， `gcr.io/systex-lab-7093cf/myapp` 但與 `myapp:v3` 有著相同的 `IMAGE ID`
+
+最後，我們要將映像檔推送出去
+
+```
+docker push gcr.io/$GOOGLE_PROJECT_ID/myapp:v3
+```
+
+正常的執行過程會接近以下內容，如果有出現 `unauthorized` 錯誤，請回到本 Task 最開始片段，取得授權。
+
+```
+The push refers to repository [gcr.io/systex-lab-7093cf/myapp]
+5935cbd7b6a7: Layer already exists
+c1a0ac1e136e: Layer already exists
+61fab8a2255c: Layer already exists
+0e466e4fcb71: Layer already exists
+7c5480cd7d08: Layer already exists
+aabe8fddede5: Layer already exists
+bcf2f368fe23: Layer already exists
+v3: digest: sha256:91702aac8a501bd2fa77bd58e032aa6168af6990b3d945b5c47ef364be937fdf size: 1786
+```
+
+---
+
+## 課堂練習-04
+
+* __問題：__ 如何測試映像檔是否上傳成功？
+
+> 提示：ENTRYPOINT 與 CMD 都有只能執行一次的限制
