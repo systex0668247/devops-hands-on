@@ -86,7 +86,7 @@ yum install -y git
 
 ---
 
-## 在Alpine Linux容器中運行 SingleTask 容器 
+### 在Alpine Linux容器中運行 SingleTask 容器 
 
 在這一步中，我們將啟動一個新容器並告訴它執行`hostname`指令。容器將啟動，執行`hostname`指令，然後退出。
 
@@ -129,7 +129,7 @@ docker ps --all
 
 ---
 
-## 在 Ubuntu 容器運行 Interactively 容器 ##
+### 在 Ubuntu 容器運行 Interactively 容器 ##
 
 您可以使用 Docker 運行不同版本 Linux，例如在下方示例中，我們將在CentOS Linux 主機上運行Ubuntu Linux容器
 
@@ -194,7 +194,7 @@ Kernel \r on an \m
 
 ---
 
-## 運行後台MySQL容器
+### 運行後台MySQL容器
 
 後台容器是您運行大多數應用程序的方式。這是一個使用MySQL的簡單示例。
 
@@ -316,7 +316,7 @@ exit
 
 ---
 
-## 課堂練習-01
+### 課堂練習-01
 
 執行以下指令，可以列出您目前本地端 repo 的所有映像檔
 
@@ -345,7 +345,7 @@ alpine              latest              5cb3aa00f899        2 weeks ago         
 
 Dockerfile語法很簡單。在這項任務中，我們將從Dockerfile創建一個簡單的 python 網頁站台
 
-## 建立 Dockerfile
+### 建立 Dockerfile
 
 讓我們看一下我們將要使用的Dockerfile，它構建了一個允許您發送推文的簡單網站。
 
@@ -381,7 +381,7 @@ cat Dockerfile
 
 `ENTRYPOINT` 與 `CMD` 之間的差異比較難理解，但可運作的 `Dockerfile` 最少需要設置一個 `ENTRYPOINT` 或 `CMD` 。此項目我們會在下一個 Task 中進行。
 
-## 建立映像檔
+### 建立映像檔
 
 使用 `docker build` 命令，依照 `Dockerfile` 中的指令，建立新的Docker映像檔。
 
@@ -468,7 +468,7 @@ REPOSITORY          TAG                 IMAGE ID            CREATED             
 myapp               v1                  8023671c6799        15 seconds ago      101MB
 ```
 
-## 運行映像檔
+### 運行映像檔
 
 使用 `docker run` 命令，運行您創建的映像檔啟動新容器。
 
@@ -496,7 +496,7 @@ Hello World!!!
 
 ---
 
-## 課堂練習-02
+### 課堂練習-02
 
 現在你有一個容器正在運行中，你可以用 `docker ps` 來找尋運行中的容器清單，類似下方輸出結果。目前你應該有一個容器正在運行中
 
@@ -517,7 +517,7 @@ b8375e3ded63        f97dc95a465e        "python app.py"     2 hours ago         
 
 在開始之前，以下內容都會在 Linux 命令列上進行檔案的編修，如果您並不熟悉 Linux shell 指令操作，強烈建議您先閱讀[鳥哥的Linux > vim 程式編輯器](http://linux.vbird.org/linux_basic/0310vi.php#vi_ex)
 
-## EXPOSE
+### EXPOSE
 
 `EXPOSE` 指令，會宣告你的容器對外有那些通訊埠開啟，但此設定並不會對外服務，你還是要透過 `docker run -p` 的方式才能讓容器的通訊埠對外發佈服務
 
@@ -589,7 +589,7 @@ curl localhost:32769
 
 你可以先中止已啟動的容器，再進入下一步。
 
-## ENTRYPOINT 與 CMD
+### ENTRYPOINT 與 CMD
 
 前一個 Task 中，我們有使用到 `ENTRYPOINT` 與 `CMD` ，兩個指令的特性都是在啟動容器時運行指令，而且只有最後一次宣告的會生效，唯一差別只有 `ENTRYPOINT` 不能被替換，而 `CMD` 則是可以被替換的
 
@@ -623,7 +623,7 @@ curl localhost:5000
 
 成功你應該可看到 `Replaced Hello World~~~`
 
-## VOLUME
+### VOLUME
 
 <<說明>>
 
@@ -732,7 +732,7 @@ INFO:root:f7cd97856867
 
 ---
 
-## 課堂練習-03
+### 課堂練習-03
 
 * __問題：__ 如果我需要一個建立一個 php + mysql 的服務，要怎麼設計 Dockerfile？
 
@@ -743,6 +743,8 @@ INFO:root:f7cd97856867
 ## Task 4: 發佈至公開的 Container Repository 
 
 本階段會演示如何將你的映像檔(docker image)，推送至公開的 container repository 中。
+
+### 設定Google Container Repository
 
 以下示例，我們使用了 Google Container Repository(GCR) 作為公開 repo。要使用 GCR，首先要啟用 `Google Container Repository API` 服務，輸入以下指令可協助你在命令列上啟用。
 
@@ -773,6 +775,8 @@ cat ~/.dockercfg
 ```
 unauthorized: You don't have the needed permissions to perform this operation, and you may have invalid credentials. To authenticate your request, follow the steps in: https://cloud.google.com/container-registry/docs/advanced-authentication
 ```
+
+### 更換映像檔Tag
 
 在 Task-3 中，最後我們產出了一個映像檔 `myapp:v3` ，現在我們要將這個映像檔推送至 GCR。如果你沒有 `myapp:v3` 也沒關係，你可以任何取得一個映像檔，例如 `docker pull alpine` 代替 `myapp:v3` 。
 
@@ -807,8 +811,6 @@ GOOGLE_PROJECT_ID=$(gcloud config get-value project)
 docker tag 1be5907b8113 gcr.io/$GOOGLE_PROJECT_ID/myapp:v3
 ```
 
-
-
 再次輸入 `docker images` 如下
 
 ```
@@ -820,6 +822,8 @@ myapp                            v1                  44e4ed120fbe        7 days 
 ```
 
 你會看到多了一個映像檔， `gcr.io/systex-lab-7093cf/myapp` 但與 `myapp:v3` 有著相同的 `IMAGE ID`
+
+### 發佈至 GCR
 
 最後，我們要將映像檔推送出去
 
@@ -843,8 +847,9 @@ v3: digest: sha256:91702aac8a501bd2fa77bd58e032aa6168af6990b3d945b5c47ef364be937
 
 ---
 
-## 課堂練習-04
+### 課堂練習-04
 
 * __問題：__ 如何測試映像檔是否上傳成功？
 
 > 提示：ENTRYPOINT 與 CMD 都有只能執行一次的限制
+
