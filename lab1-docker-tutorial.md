@@ -632,7 +632,7 @@ curl localhost:5000
 vi Dockerfile
 ```
 
-增加 `VOLUME` 宣告，我們將目錄 `/app/logs` 建立成為 Volume，並預設啟動程式 `app.py` 替換為 `replace.py`。`replace.py` 這支程式，只會印出目前本機的 `hostname` 並寫入 `/app/logs/myapp.log` 便結束應用程式。最終結果應該如下
+增加 `VOLUME` 宣告，我們將目錄 `/app/logs` 建立成為 Volume，並預設啟動程式 `app.py` 替換為 `logging.py`。`logging.py` 這支程式，只會印出目前本機的 `hostname` 並寫入 `/app/logs/myapp.log` 便結束應用程式。最終結果應該如下
 
 ```
 FROM python:alpine
@@ -647,7 +647,7 @@ VOLUME /app/logs
 EXPOSE 5000
 
 ENTRYPOINT ["python"]
-CMD ["replace.py"]
+CMD ["logging.py"]
 ``` 
 
 完成後，我們要將修改的內容重新建立，並更換版本代碼至 `v3`
@@ -662,7 +662,7 @@ docker build -t myapp:v3 .
 docker run -d -p 5000:5000 myapp:v3
 ```
 
-容器啟動後，你可以執行 `docker ps` 查看，你會發現容器不存在，或是很快就結束，這是正常的。
+容器啟動後，你可以執行 `docker ps` 查看，你會發現容器不存在，或是很快就結束，這是正常的。但因為我們在 Dockerfile 中有宣告 `VOLUME` ，所以即使容器結束了， `VOLUME` 中的內容是仍然是存在的。
 
 輸入以下指令，查看目前所有存在的 volume 
 
@@ -677,7 +677,31 @@ DRIVER              VOLUME NAME
 local               6fd268fb52b198cfd2d1d61b7d3ab7a9a3b2d60dceef4c613d8e6628336782dc
 ```
 
-但目前的 `VOLUME NAME` 難以識別用途，我們重新建立一個較易識別用途的名稱，以下取名為 `myapp-log` ，輸入以下指令建立新的 Volume
+為了查看 `VOLUME` 中的資料，我們要先找出真實存放資料的路徑
+
+```
+docker volume inspect <YOUR_VOLUME_NAME>
+```
+
+你會看到類似以下的內容
+
+```
+[
+    {
+        "CreatedAt": "2019-04-06T06:31:55Z",
+        "Driver": "local",
+        "Labels": null,
+        "Mountpoint": "/var/lib/docker/volumes/6fd268fb52b198cfd2d1d61b7d3ab7a9a3b2d60dceef4c613d8e6628336782dc/_data",
+        "Name": "6fd268fb52b198cfd2d1d61b7d3ab7a9a3b2d60dceef4c613d8e6628336782dc",
+        "Options": null,
+        "Scope": "local"
+    }
+]
+```
+
+其中 `Mountpoint` 就是真實存放資料的路徑，你可以使用 `ls` 指令查看其目錄下的內容。
+
+接下來，我們要試著讓不同的容器，共用相同的 `VOLUME`，目前的 `VOLUME NAME` 難以識別用途，我們重新建立一個較易識別用途的名稱，以下取名為 `myapp-log` ，輸入以下指令建立新的 Volume
 
 ```
 docker volume create myapp-log
@@ -686,9 +710,32 @@ docker volume create myapp-log
 接著再次啟動 myapp 時，將先前建立的 `myapp-log` 掛載進入容器之中 
 
 ```
-docker run 
+docker run -v myapp-log:/app/logs -d myapp:v3
 ```
 
+以上指令請反覆執行三次以上，每一次執行， `logging.py` 會將執行容器的 `hostname` 寫入日誌檔 `/app/logs/myapp.log` 中，接著我們查看本機端的檔案 
+
+```
+cat /var/lib/docker/volumes/myapp-log/_data/myapp.log
+```
+
+你應該會看到類似以下的內容
+
+```
+INFO:root:ec07fdc67414
+INFO:root:d3ccb2556821
+INFO:root:f7cd97856867
+```
+
+這表示我們成功的讓不同的容器的日誌資料，寫入同一個檔案之中。
+
+---
+
+## 課堂練習-03
+
+* __問題：__ 如果我需要一個建立一個 php + mysql 的服務，要怎麼設計 Dockerfile？
+
+> 提示：ENTRYPOINT 與 CMD 都有只能執行一次的限制
 
 ---
 
@@ -707,3 +754,4 @@ gcloud services enable containerregistry.googleapis.com
 ```
 denied: Token exchange failed for project 'systex-lab-f7c658'. Please enable Google Container Registry API in Cloud Console at https://console.cloud.google.com/apis/api/containerregistry.googleapis.com/overview?project=systex-lab-f7c658 before performing this operation.
 ```
+
