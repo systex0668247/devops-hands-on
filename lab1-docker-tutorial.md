@@ -140,9 +140,9 @@ docker run --interactive --tty --rm ubuntu bash
 
 在這個例子中，我們給Docker三個參數：
 
-`--interactive` 指定使用互動式的 session。
-`--tty` 分配一個偽tty。
-`--rm` 告訴Docker在完成執行後，移除容器。
+* `--interactive` 指定使用互動式的 session。
+* `--tty` 分配一個偽tty。
+* `--rm` 告訴Docker在完成執行後，移除容器。
 
 前兩個參數允許您與Docker容器進行互動，我們還告訴容器以`bash`作為主要 process（PID 1）。當容器啟動時，您將使用bash shell進入容器內 
 
@@ -371,12 +371,12 @@ cat Dockerfile
 
 讓我們看看Dockerfile中的每一行是做什麼的。
 
-  `FROM` 指定要用作您正在創建的新映像檔的來源映像。本示例中，我們使用的是 `python:alpine`。
-  `COPY` 將文件從Docker主機複製到已知位置的映像中。在此示例中，COPY用於將目錄 `~/devops-hands-on/sample/hello` 下的所有檔案，拷貝一份至映像中，映像檔內路徑為 `/app`
-  `WORKDIR` 指令用於設置Dockerfile中的`RUN`、`CMD`和`ENTRYPOINT`指令的工作錄(預設為 `/` )，該指令在Dockerfile文件中可以出現多次。
-  `RUN` 指令會執行指定的命令，本示例會在 `WORKDIR` 中找尋檔案 `requirements.txt` 依內容安裝 python 套件
-  `ENTRYPOINT` 指定從映像啟動容器時要運行的命令，如果有多個 `ENTRYPOINT` 指令，那只有最後一個生效；通常用來設置不會變化的指令，例如啟動服務 (mysqld)。本示例中為呼叫 `python` 
-  `CMD` 指定從映像啟動容器時要運行的命令。如果有多個 `CMD` 指令，那只有最後一個生效；通常用來設置參數類的項目。本示例中是將檔案 `app.py` 作為參數送入 `python` 命令執行
+  * `FROM` 指定要用作您正在創建的新映像檔的來源映像。本示例中，我們使用的是 `python:alpine`。
+  * `COPY` 將文件從Docker主機複製到已知位置的映像中。在此示例中，COPY用於將目錄 `~/devops-hands-on/sample/hello` 下的所有檔案，拷貝一份至映像中，映像檔內路徑為 `/app`
+  * `WORKDIR` 指令用於設置Dockerfile中的`RUN`、`CMD`和`ENTRYPOINT`指令的工作錄(預設為 `/` )，該指令在Dockerfile文件中可以出現多次。
+  * `RUN` 指令會執行指定的命令，本示例會在 `WORKDIR` 中找尋檔案 `requirements.txt` 依內容安裝 python 套件
+  * `ENTRYPOINT` 指定從映像啟動容器時要運行的命令，如果有多個 `ENTRYPOINT` 指令，那只有最後一個生效；通常用來設置不會變化的指令，例如啟動服務 (mysqld)。本示例中為呼叫 `python` 
+  * `CMD` 指定從映像啟動容器時要運行的命令。如果有多個 `CMD` 指令，那只有最後一個生效；通常用來設置參數類的項目。本示例中是將檔案 `app.py` 作為參數送入 `python` 命令執行
 
 `ENTRYPOINT` 與 `CMD` 之間的差異比較難理解，但可運作的 `Dockerfile` 最少需要設置一個 `ENTRYPOINT` 或 `CMD` 。此項目我們會在下一個 Task 中進行。
 
@@ -384,8 +384,8 @@ cat Dockerfile
 
 使用 `docker build` 命令，依照 `Dockerfile` 中的指令，建立新的Docker映像檔。
 
-  `-t` 允許我們為映像檔提供自定義名稱。
-  `.` 告訴 Docker 使用當前目錄
+  * `-t` 允許我們為映像檔提供自定義名稱。
+  * `.` 告訴 Docker 使用當前目錄
 
   __請務必在命令末尾包含句點 `.`__
 
@@ -632,7 +632,7 @@ curl localhost:5000
 vi Dockerfile
 ```
 
-增加 `VOLUME` 宣告，我們將目錄 `/app/logs` 建立成為 Volume，並預設啟動程式 `app.py` 替換為 `replace.py`，最終結果應該如下
+增加 `VOLUME` 宣告，我們將目錄 `/app/logs` 建立成為 Volume，並預設啟動程式 `app.py` 替換為 `replace.py`。`replace.py` 這支程式，只會印出目前本機的 `hostname` 並寫入 `/app/logs/myapp.log` 便結束應用程式。最終結果應該如下
 
 ```
 FROM python:alpine
@@ -662,7 +662,9 @@ docker build -t myapp:v3 .
 docker run -d -p 5000:5000 myapp:v3
 ```
 
-輸入以下指令，查看目前所有存在的 volume
+容器啟動後，你可以執行 `docker ps` 查看，你會發現容器不存在，或是很快就結束，這是正常的。
+
+輸入以下指令，查看目前所有存在的 volume 
 
 ```
 docker volume ls
@@ -675,6 +677,17 @@ DRIVER              VOLUME NAME
 local               6fd268fb52b198cfd2d1d61b7d3ab7a9a3b2d60dceef4c613d8e6628336782dc
 ```
 
+但目前的 `VOLUME NAME` 難以識別用途，我們重新建立一個較易識別用途的名稱，以下取名為 `myapp-log` ，輸入以下指令建立新的 Volume
+
+```
+docker volume create myapp-log
+```
+
+接著再次啟動 myapp 時，將先前建立的 `myapp-log` 掛載進入容器之中 
+
+```
+docker run 
+```
 
 
 ---
@@ -694,4 +707,3 @@ gcloud services enable containerregistry.googleapis.com
 ```
 denied: Token exchange failed for project 'systex-lab-f7c658'. Please enable Google Container Registry API in Cloud Console at https://console.cloud.google.com/apis/api/containerregistry.googleapis.com/overview?project=systex-lab-f7c658 before performing this operation.
 ```
-
