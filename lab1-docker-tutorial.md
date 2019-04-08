@@ -12,7 +12,7 @@
 * Task 3：更多 Dockerfile 常用指令練習
 * Task 4：發佈至公開的 Container Repository 
 
-> 請盡可能自行輸入指令，增加印象
+> __請盡可能自行輸入指令，增加印象__ [color=red]
 
 ---
 
@@ -28,13 +28,13 @@
 
     登入 GCP 在 Google Cloud Shell 下輸入以下指令，約需 3min
 
-```
+```bash=
 bash <(curl -L http://tiny.cc/systex-devops01-install)
 ```
 
-    完成後，請依照指示登入虛擬機，並換為 root user，後續示例皆以 root 設計
+完成後，請依照指示登入虛擬機，並換為 root user，後續示例皆以 root 設計
 
-```
+```bash=
 sudo su 
 ```
 
@@ -44,7 +44,7 @@ sudo su
 
 拷貝以下指令，貼上虛擬機命令列上執行 
 
-```
+```bash=
 yum install -y yum-utils device-mapper-persistent-data lvm2
 yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 yum install -y docker-ce docker-ce-cli containerd.io
@@ -53,7 +53,7 @@ systemctl start docker
 
 為確認是否安裝完成，執行hello-world
 
-```
+```bash=
 docker run hello-world
 ```
 
@@ -61,14 +61,14 @@ docker run hello-world
 
 拷貝以下命令從GitHub clone Lab的原始碼。
 
-```
+```bash=
 cd ~
 git clone https://github.com/bryanwu66/devops-hands-on.git
 ```
 
 若您以上指令無法正確執行，請先確認是否已安裝 `git`
 
-```
+```bash=
 yum install -y git
 ```
 
@@ -92,7 +92,7 @@ yum install -y git
 
 在Linux console中執行以下指令。
 
-```
+```bash=
 docker run alpine hostname
 ```
 
@@ -114,7 +114,7 @@ docker run alpine hostname
 
 列出所有容器。
 
-```
+```bash=
 docker ps --all
 ```
 
@@ -135,7 +135,7 @@ docker ps --all
 
 運行Docker容器並訪問其shell。
 
-```
+```bash=
 docker run --interactive --tty --rm ubuntu bash
 ```
 
@@ -151,21 +151,21 @@ docker run --interactive --tty --rm ubuntu bash
 
 `ls /` 將列出容器中根目錄的內容，`ps aux`將顯示容器中正在運行的 process，`cat /etc/issue`將顯示容器正在運行的Linux版本，在本示例中為 `Ubuntu 18.04.2 LTS`
 
-```
+```bash=
 ls /
 ```
 
-```
+```bash=
 ps aux
 ```
 
-```
+```bash=
 cat /etc/issue
 ```
 
 輸入 `exit` 退出 shell。這將終止bash process，導致容器退出 (`Exited`)。
 
-```
+```bash=
 exit
 ```
 
@@ -173,7 +173,7 @@ exit
 
 為了好玩，我們來檢查VM主機的版本。
 
-```
+```bash=
 cat /etc/issue
 ```
 
@@ -200,7 +200,7 @@ Kernel \r on an \m
 
 使用以下命令運行新的MySQL容器。
 
-```
+```bash=
 docker run \
   --detach \
   --name mydb \
@@ -236,7 +236,7 @@ docker run \
 
 列出正在 __運行中__ 的容器。
 
-```
+```bash=
 docker ps
 ```
 
@@ -249,7 +249,7 @@ docker ps
 
 您可以使用幾個內建的Docker命令來檢查容器中發生的事情：`docker logs`和`docker top`。
 
-```
+```bash=
 docker logs mydb
 ```
 
@@ -263,7 +263,7 @@ Initializing database
 
 讓我們看一下容器內運行的 process。
 
-```
+```bash=
 docker top mydb
 ```
 
@@ -280,7 +280,7 @@ polkitd             4434                4418                1                   
 
 `docker exec`允許您在容器內執行指令。在這個例子中，我們將使用`docker exec`執行`mysql --user=root --password=$MYSQL_ROOT_PASSWORD --versionMySQL`容器內部的命令行等效命令。
 
-```
+```bash=
 docker exec -it mydb \
 mysql --user=root --password=$MYSQL_ROOT_PASSWORD --version
 ```
@@ -294,7 +294,7 @@ mysql  Ver 8.0.15 for Linux on x86_64 (MySQL Community Server - GPL)
 
 您還可以使用`docker exec`連接到運行中的容器內執行 shell 。執行以下命令將為`sh`您提供MySQL容器內的交互式shell（）。
 
-```
+```bash=
 docker exec -it mydb sh
 ```
 
@@ -302,7 +302,7 @@ docker exec -it mydb sh
 
 讓我們通過再次運行相同的命令來檢查版本號，只是這次是在容器中的shell session中。
 
-```
+```bash=
 mysql --user=root --password=$MYSQL_ROOT_PASSWORD --version
 ```
 
@@ -310,7 +310,7 @@ mysql --user=root --password=$MYSQL_ROOT_PASSWORD --version
 
 鍵入`exit`以退出交互式shell會話。
 
-```
+```bash=
 exit
 ```
 
@@ -320,7 +320,7 @@ exit
 
 執行以下指令，可以列出您目前本地端 repo 的所有映像檔
 
-```
+```bash=
 docker images
 ```
 
@@ -335,7 +335,7 @@ alpine              latest              5cb3aa00f899        2 weeks ago         
 
 * __問題：__ 要如何刪除本地端 repo 的映像檔？
 
-> 提示：請試著看 docker help
+> 提示：請試著看 docker help [color=green]
 
 ---
 
@@ -351,17 +351,17 @@ Dockerfile語法很簡單。在這項任務中，我們將從Dockerfile創建一
 
 1. 請確認您在正在的目錄中
 
-```
+```bash=
 cd ~/devops-hands-on/sample/hello
 ```
 
 2. 顯示Dockerfile的內容
 
-```
+```bash=
 cat Dockerfile
 ```
 
-```
+```dockerfile=
  FROM python:alpine
  COPY . /app
  WORKDIR /app
@@ -390,7 +390,7 @@ cat Dockerfile
 
   __請務必在命令末尾包含句點 `.`__
 
-```
+```bash=
 docker build -t myapp:v1 .
 ```
 
@@ -424,7 +424,7 @@ Successfully tagged myapp:v1
 
 我們要試試看，如果相同的指令，再度執行一次會發生什麼情況
 
-```
+```bash=
 docker build -t myapp:v1 .
 ```
 
@@ -457,7 +457,7 @@ Successfully tagged myapp:v1
 
 輸入以下指令，確認本地端 repository 狀況
 
-```
+```bash=
 docker images
 ```
 
@@ -472,7 +472,7 @@ myapp               v1                  8023671c6799        15 seconds ago      
 
 使用 `docker run` 命令，運行您創建的映像檔啟動新容器。
 
-```
+```bash=
 docker run -d -p 5000:5000 myapp:v1
 ```
 
@@ -482,7 +482,7 @@ docker run -d -p 5000:5000 myapp:v1
 
 接著你可以使用 `docker ps` 指令觀察運行中的容器狀態，為了測試服務運作是否正常，輸入以下指令
 
-```
+```bash=
 curl localhost:5000
 ```
 
@@ -507,7 +507,7 @@ b8375e3ded63        f97dc95a465e        "python app.py"     2 hours ago         
 
 * __問題：__ 要如何中止容器？
 
-> 提示：請試著看 docker help
+> 提示：請試著看 docker help [color=green]
 
 ---
 
@@ -523,13 +523,13 @@ b8375e3ded63        f97dc95a465e        "python app.py"     2 hours ago         
 
 修改您的 Dockerfile 
 
-```
+```bash=
 vi Dockerfile
 ```
 
 增加 EXPOSE 宣告，我們宣告開啟 `EXPOSE 5000`，加入Dockerfile 位置參考如下，並記得存檔再離開
 
-```
+```dockerfile=
 FROM python:alpine
 
 COPY . /app
@@ -545,13 +545,13 @@ CMD ["app.py"]
 
 完成後，我們要將修改的內容重新建立，並更換版本代碼至 `v2`
 
-```
+```bash=
 docker build -t myapp:v2 . 
 ```
 
 現在我們可以同時啟動兩個不同版本的 `myapp` 比較差異
 
-```
+```bash=
 docker run -d myapp:v1
 docker run -d myapp:v2 
 ```
@@ -566,7 +566,7 @@ af5ea393185c        myapp:v1            "python app.py"     6 seconds ago       
 
 使用 `EXPOSE` 指令，可指令 `docker run` 可搭配 `-P` 使用，Docker 主機會隨機分配對外通信埠與容器所宣告的對外埠連接 
 
-```
+```bash=
 docker run -d -P myapp:v2
 ```
 
@@ -581,7 +581,7 @@ af5ea393185c        myapp:v1            "python app.py"     5 minutes ago       
 
 簡易測試運作是否正常的，這時的通訊埠要指定至隨機分配的埠，成功你應該可看到 `Hello World!!!`
 
-```
+```bash=
 curl localhost:32769
 ```
 
@@ -595,7 +595,7 @@ curl localhost:32769
 
 為了測試這個特性，我們要試著改變 `CMD` 的內容，但不修改 `Dockerfile` ，先觀察目前 `Dockerfile` 的內容 
 
-```
+```dockerfile=
 FROM python:alpine
 
 COPY . /app
@@ -611,13 +611,13 @@ CMD ["app.py"]
 
 `CMD` 中所指定的是一個檔案，接著我們要在啟動的過程中，替換 `app.py` 改執行其它應用程式
 
-```
+```bash=
 docker run -d -p 5000:5000 myapp:v2 replace.py
 ```
 
 簡易測試運作是否正常的
 
-```
+```bash=
 curl localhost:5000
 ```
 
@@ -629,13 +629,13 @@ curl localhost:5000
 
 修改您的 Dockerfile 
 
-```
+```bash=
 vi Dockerfile
 ```
 
 增加 `VOLUME` 宣告，我們將目錄 `/app/logs` 建立成為 Volume，並預設啟動程式 `app.py` 替換為 `logging.py`。`logging.py` 這支程式，只會印出目前本機的 `hostname` 並寫入 `/app/logs/myapp.log` 便結束應用程式。最終結果應該如下
 
-```
+```dockerfile=
 FROM python:alpine
 
 COPY . /app
@@ -653,13 +653,13 @@ CMD ["logging.py"]
 
 完成後，我們要將修改的內容重新建立，並更換版本代碼至 `v3`
 
-```
+```bash=
 docker build -t myapp:v3 . 
 ```
 
 接著將容器啟動
 
-```
+```bash=
 docker run -d -p 5000:5000 myapp:v3
 ```
 
@@ -667,7 +667,7 @@ docker run -d -p 5000:5000 myapp:v3
 
 輸入以下指令，查看目前所有存在的 volume 
 
-```
+```bash=
 docker volume ls
 ```
 
@@ -680,13 +680,13 @@ local               6fd268fb52b198cfd2d1d61b7d3ab7a9a3b2d60dceef4c613d8e66283367
 
 為了查看 `VOLUME` 中的資料，我們要先找出真實存放資料的路徑
 
-```
+```bash=
 docker volume inspect <YOUR_VOLUME_NAME>
 ```
 
 你會看到類似以下的內容
 
-```
+```json
 [
     {
         "CreatedAt": "2019-04-06T06:31:55Z",
@@ -704,19 +704,19 @@ docker volume inspect <YOUR_VOLUME_NAME>
 
 接下來，我們要試著讓不同的容器，共用相同的 `VOLUME`，目前的 `VOLUME NAME` 難以識別用途，我們重新建立一個較易識別用途的名稱，以下取名為 `myapp-log` ，輸入以下指令建立新的 Volume
 
-```
+```bash=
 docker volume create myapp-log
 ```
 
 接著再次啟動 myapp 時，將先前建立的 `myapp-log` 掛載進入容器之中 
 
-```
+```bash=
 docker run -v myapp-log:/app/logs -d myapp:v3
 ```
 
 以上指令請反覆執行三次以上，每一次執行， `logging.py` 會將執行容器的 `hostname` 寫入日誌檔 `/app/logs/myapp.log` 中，接著我們查看本機端的檔案 
 
-```
+```bash=
 cat /var/lib/docker/volumes/myapp-log/_data/myapp.log
 ```
 
@@ -736,7 +736,7 @@ INFO:root:f7cd97856867
 
 * __問題：__ 如果我需要一個建立一個 php + mysql 的服務，要怎麼設計 Dockerfile？
 
-> 提示：ENTRYPOINT 與 CMD 都有只能執行一次的限制
+> 提示：ENTRYPOINT 與 CMD 都有只能執行一次的限制 [color=green]
 
 ---
 
@@ -748,7 +748,7 @@ INFO:root:f7cd97856867
 
 以下示例，我們使用了 Google Container Repository(GCR) 作為公開 repo。要使用 GCR，首先要啟用 `Google Container Repository API` 服務，輸入以下指令可協助你在命令列上啟用。
 
-```
+```bash=
 gcloud services enable containerregistry.googleapis.com
 ```
 
@@ -760,13 +760,13 @@ denied: Token exchange failed for project 'systex-lab-f7c658'. Please enable Goo
 
 接著我們要取得 GCR 的授權，我們可以透過 gcloud 工具的協助取得
 
-```
+```bash=
 gcloud docker
 ```
 
 以上指令並沒有任何結果產生，但會取得 GCR 授權，自動寫入 `.dockercfg` 中，以下指令可以檢視取的授權的資料
 
-```
+```bash=
 cat ~/.dockercfg 
 ```
 
@@ -782,7 +782,7 @@ unauthorized: You don't have the needed permissions to perform this operation, a
 
 首先我們要找到 `myapp:v3` 映像檔的 `IMAGE ID`，輸入以下指令
 
-```
+```bash=
 docker images
 ```
 
@@ -799,7 +799,7 @@ myapp                            v1                  44e4ed120fbe        7 days 
 
 上傳至 GCR 的路徑中，必需包含你目前操作的專案名稱，為以下操作便利，先將專案名稱存至環境變數中，執行以下命令
 
-```
+```bash=
 GOOGLE_PROJECT_ID=$(gcloud config get-value project)
 ```
 
@@ -807,7 +807,7 @@ GOOGLE_PROJECT_ID=$(gcloud config get-value project)
 
 接下來，要使用 `docker tag` 指令，將公開的repo位置加入映像檔名稱中，並對應到一個已存在的映像檔
 
-```
+```bash=
 docker tag 1be5907b8113 gcr.io/$GOOGLE_PROJECT_ID/myapp:v3
 ```
 
@@ -827,7 +827,7 @@ myapp                            v1                  44e4ed120fbe        7 days 
 
 最後，我們要將映像檔推送出去
 
-```
+```bash=
 docker push gcr.io/$GOOGLE_PROJECT_ID/myapp:v3
 ```
 
@@ -850,6 +850,4 @@ v3: digest: sha256:91702aac8a501bd2fa77bd58e032aa6168af6990b3d945b5c47ef364be937
 ### 課堂練習-04
 
 * __問題：__ 如何測試映像檔是否上傳成功？
-
-> 提示：ENTRYPOINT 與 CMD 都有只能執行一次的限制
 
