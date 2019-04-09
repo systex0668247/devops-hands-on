@@ -45,7 +45,7 @@ sudo su
 拷貝以下指令，貼上虛擬機命令列上執行 
 
 ```bash=
-yum install -y yum-utils device-mapper-persistent-data lvm2
+yum install -y yum-utils device-mapper-persistent-data lvm2 git
 yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 yum install -y docker-ce docker-ce-cli containerd.io
 systemctl start docker
