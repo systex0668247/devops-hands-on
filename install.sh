@@ -135,7 +135,7 @@ EOF
   gcloud compute scp ./my-environments --project=$GOOGLE_PROJECT_ID --zone=$GOOGLE_ZONE systex@$GOOGLE_GCE_NAME:/tmp > /dev/null 2>&1 && \
   gcloud compute ssh --project=$GOOGLE_PROJECT_ID --zone=$GOOGLE_ZONE systex@$GOOGLE_GCE_NAME <<EOF > /dev/null 2>&1 && echo "完成"
 cat /tmp/my-environments >> ~/.bashrc
-cat /tmp/my-environments | tee --append /etc/environment
+cat /tmp/my-environments | sudo tee --append /etc/environment
 EOF
 
 }
