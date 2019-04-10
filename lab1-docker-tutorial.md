@@ -633,7 +633,7 @@ curl localhost:5000
 vi Dockerfile
 ```
 
-增加 `VOLUME` 宣告，我們將目錄 `/app/logs` 建立成為 Volume，並預設啟動程式 `app.py` 替換為 `logging.py`。`logging.py` 這支程式，只會印出目前本機的 `hostname` 並寫入 `/app/logs/myapp.log` 便結束應用程式。最終結果應該如下
+增加 `VOLUME` 宣告，我們將目錄 `/app/logs` 建立成為 Volume，並預設啟動程式 `app.py` 替換為 `log.py`。`log.py` 這支程式，只會印出目前本機的 `hostname` 並寫入 `/app/logs/myapp.log` 便結束應用程式。最終結果應該如下
 
 ```dockerfile=
 FROM python:alpine
@@ -648,7 +648,7 @@ VOLUME /app/logs
 EXPOSE 5000
 
 ENTRYPOINT ["python"]
-CMD ["logging.py"]
+CMD ["log.py"]
 ``` 
 
 完成後，我們要將修改的內容重新建立，並更換版本代碼至 `v3`
@@ -714,7 +714,7 @@ docker volume create myapp-log
 docker run -v myapp-log:/app/logs -d myapp:v3
 ```
 
-以上指令請反覆執行三次以上，每一次執行， `logging.py` 會將執行容器的 `hostname` 寫入日誌檔 `/app/logs/myapp.log` 中，接著我們查看本機端的檔案 
+以上指令請反覆執行三次以上，每一次執行， `log.py` 會將執行容器的 `hostname` 寫入日誌檔 `/app/logs/myapp.log` 中，接著我們查看本機端的檔案 
 
 ```bash=
 cat /var/lib/docker/volumes/myapp-log/_data/myapp.log
