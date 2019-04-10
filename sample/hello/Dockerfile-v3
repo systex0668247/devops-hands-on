@@ -10,4 +10,4 @@ VOLUME /app/logs
 EXPOSE 5000
 
 ENTRYPOINT ["python"]
-CMD ["logging.py"]
+CMD ["log.py"]
