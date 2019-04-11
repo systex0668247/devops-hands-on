@@ -106,10 +106,10 @@ createK8S() {
 }
 
 
-checkRootUser
-checkGcloudLogin
+#checkRootUser
+#checkGcloudLogin
 initParameter
-installKubectl
+#installKubectl
 createK8S
 
 cat <<EOF
