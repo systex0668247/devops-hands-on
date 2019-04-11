@@ -92,14 +92,12 @@ createK8S() {
       --machine-type=$GOOGLE_GKE_MACHINE \
       --region=$GOOGLE_ZONE \
       --num-nodes=1 \
-      --cluster-version=$GOOGLE_GKE_VERSION \
-    echo "完成"
+      --cluster-version=$GOOGLE_GKE_VERSION 
 
   printf "  正在設定授權..."
   kubectl create clusterrolebinding cluster-admin-binding \
     --clusterrole=cluster-admin \
-    --user=$(gcloud config get-value core/account) \
-    echo "完成" 
+    --user=$(gcloud config get-value core/account)
 
 }
 
