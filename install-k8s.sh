@@ -30,6 +30,7 @@ checkGcloudLogin() {
 # 設定參數
 initParameter() {
   echo "參數設定確認中..."
+  
   # GOOGLE_PROJECT_ID
   if [ -z $GOOGLE_PROJECT_ID  ]; then
     GOOGLE_PROJECT_ID=systex-lab-$(cat /proc/sys/kernel/random/uuid | cut -b -6)
@@ -88,7 +89,6 @@ createK8S() {
 
   printf "  開始建立 GKE($GOOGLE_GKE_NAME)..."
   gcloud container clusters create $GOOGLE_GKE_NAME \
-      --project=$GOOGLE_PROJECT_ID \
       --machine-type=$GOOGLE_GKE_MACHINE \
       --region=$GOOGLE_ZONE \
       --num-nodes=1 \
