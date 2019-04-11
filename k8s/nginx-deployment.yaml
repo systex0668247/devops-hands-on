@@ -15,4 +15,4 @@ spec:
       - name: nginx
         image: abevoelker/docker-nginx-alpine-brotli
         ports:
-        - containerPort: 8080
+        - containerPort: 80
