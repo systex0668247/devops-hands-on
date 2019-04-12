@@ -30,6 +30,7 @@ checkGcloudLogin() {
 # 設定參數
 initParameter() {
   echo "參數設定確認中..."
+  
   # GOOGLE_PROJECT_ID
   if [ -z $GOOGLE_PROJECT_ID  ]; then
     GOOGLE_PROJECT_ID=systex-lab-$(cat /proc/sys/kernel/random/uuid | cut -b -6)
@@ -84,32 +85,27 @@ createK8S() {
   echo "正在建立GKE..."
   
   printf "  啟用 Container API..."
-  gcloud services enable container.googleapis.com > /dev/null 2>&1 && echo "完成"
+  gcloud services enable container.googleapis.com
 
   printf "  開始建立 GKE($GOOGLE_GKE_NAME)..."
   gcloud container clusters create $GOOGLE_GKE_NAME \
-      --project=$GOOGLE_PROJECT_ID \
       --machine-type=$GOOGLE_GKE_MACHINE \
       --region=$GOOGLE_ZONE \
       --num-nodes=1 \
-      --cluster-version=$GOOGLE_GKE_VERSION \
-    > /dev/null 2>&1 && \
-    echo "完成"
+      --cluster-version=$GOOGLE_GKE_VERSION 
 
   printf "  正在設定授權..."
   kubectl create clusterrolebinding cluster-admin-binding \
     --clusterrole=cluster-admin \
-    --user=$(gcloud config get-value core/account) \
-    > /dev/null 2>&1 && \
-    echo "完成" 
+    --user=$(gcloud config get-value core/account)
 
 }
 
 
-checkRootUser
-checkGcloudLogin
+#checkRootUser
+#checkGcloudLogin
 initParameter
-installKubectl
+#installKubectl
 createK8S
 
 cat <<EOF
