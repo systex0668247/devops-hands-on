@@ -272,9 +272,70 @@ Hello World
 
 接下來要更深入一點點使用 pipeline，我們要使用 pipeline 至您 GitHub 的 Repository 中抓取原始碼。
 
+在開始前，您必需在 GitHub 中建立一組資源，請 ___另開一個新的瀏覽器視窗___ 進入 [GitHub, https://github.com](https://github.com) 網站並登入 
+
+登入後，再輸入以下網址
+
+```
+https://github.com/abola/aaa
+```
+
+這個專案內容是 Lab 過程中練習用的原始碼，請點擊畫面右上角的 ![Fork](https://github.com/abola/devops-hands-on/raw/master/images/devops-fork.png =100x) ，這動作類似於將原始碼拷貝一份至您個人的 Git Repository 中，然後你可以對原始碼進行修改。
+
+---
+
+請返回 Jenkins 的視窗，照以下步驟操作
+
 1. 請點擊畫面左上角 ![Back-to-Project](https://github.com/abola/devops-hands-on/raw/master/images/devops-back-project.png =150x) 返回專案設定。
 2. 接著點擊畫面左側 ![Configure](https://github.com/abola/devops-hands-on/raw/master/images/devops-configure.png =135x) 返回設定頁面
+3. 在設定畫面持續下拉，直到看見 `Pipeline` 設定區塊
+4. 在`Pipeline`區塊的左下角，有一個連節 `Pipeline Syntax`請點擊，將會另開新視窗如下圖，進入下一步
 
+![Pipeline Syntex](https://github.com/abola/devops-hands-on/raw/master/images/devops-pipeline-syntex.png)
+
+---
+
+這個頁面會協助您，將一些基本及常見的功能，轉換為pipeline script。以目前目標為例，我們希望至 git 中取得原始碼，請在 `Steps > Sample Step` 中選擇 `git: Git`
+
+接著下方會更新，出現文字輸入框，請在 `Repository URL` 項目中，輸入您的 GitHub 資源位置，這是先前我們 `Fork` 項目的資源位置，輸出的結果應該要如下方
+
+```
+https://github.com/<your_github_account>/devops-hands-up.git
+```
+
+接著點擊左下角 `Generate Pipeline Script` 您會在下方的文字框中得到相對應的 pipeline 指令 
+
+請拷貝文字框中的指令後，返回專案設定頁面
+
+---
+
+接著請將拷貝的指令貼上 Pipeline Script 中的文字框，並將拉取 git 的過程設定為一個關卡 _(stage)_ ，參考以下內容，編輯您的 Pipeline Script
+
+
+```pipeline=
+node {
+    stage('init'){
+        git 'https://github.com/<your_github_account>/devops-hands-on.git'
+    }
+    stage('exec'){
+        sh 'cat README.md'
+    }
+}
+```
+
+設定完成後，請按最下的 `Save` 儲存離開設定頁面
+
+---
+
+接著再次點擊左側 ![Build Now](https://github.com/abola/devops-hands-on/raw/master/images/devops-build-now.png =135x) 
+
+這次不用進入 `Build History` 中觀察作業的狀態，靜候片刻，您的畫面會出現類似下圖所示
+
+![Pipeline Stages](https://github.com/abola/devops-hands-on/raw/master/images/devops-stages.png)
+
+定義關卡後，我們可以在專案的頁面中，直接查看每一個關卡的執行過程與記錄，非常方便。
+
+到此，您已完成了 Task 2.
 
 ---
 
