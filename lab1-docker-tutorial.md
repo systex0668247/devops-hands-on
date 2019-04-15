@@ -11,14 +11,14 @@
 * Task 2：構建一個簡單的 Hello World 網站映像檔
 * Task 3：更多 Dockerfile 常用指令練習
 * Task 4：發佈至公開的 Container Repository 
-
+ 
 > __請盡可能自行輸入指令，增加印象__ [color=red]
 
 ---
 
 ## Task 0：環境建置
 
-您將需要以下所有內容完成，才能順利進行
+在 Docker for Beginners Lab 我們會建立一台 VM (Google Compute Engine) 作為運作環境，您將需要以下所有內容完成，才能順利進行
 
 ### 建立雲端虛擬機
 
@@ -32,11 +32,22 @@
 bash <(curl -L http://tiny.cc/systex-devops01-install)
 ```
 
-完成後，請依照指示登入虛擬機，並換為 root user，後續示例皆以 root 設計
+完成後，將會產生一個 `login.sh` 在您的當前的目錄下，請執行以下命令進入您的 Lab VM
+
+```bash=
+sh login.sh
+```
+
+_Google Cloud Shell 在您不使用時會自動登出，當您要返回時，請記得再次執行 `login.sh` 即可返回您的 Lab VM_
+
+
+__重要!!__ 進入 Lab VM 後，請記得先切換為 root user，以下示例皆以 root 設計
 
 ```bash=
 sudo su 
 ```
+
+
 
 ### 安裝 Docker
 
@@ -45,7 +56,7 @@ sudo su
 拷貝以下指令，貼上虛擬機命令列上執行 
 
 ```bash=
-yum install -y yum-utils device-mapper-persistent-data lvm2
+yum install -y yum-utils device-mapper-persistent-data lvm2 git
 yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 yum install -y docker-ce docker-ce-cli containerd.io
 systemctl start docker
@@ -66,12 +77,6 @@ cd ~
 git clone https://github.com/bryanwu66/devops-hands-on.git
 ```
 
-若您以上指令無法正確執行，請先確認是否已安裝 `git`
-
-```bash=
-yum install -y git
-```
-
 ---
 
 ## Task1：運行一些簡單的Docker容器
@@ -83,6 +88,28 @@ yum install -y git
 `Background`：對於長期運行的服務，如網站和數據庫。
 
 在本節中，您將嘗試其中的每個選項，並了解Docker如何管理工作負載。
+
+---
+
+### 進入 Lab 環境
+
+請開啟一個新的瀏覽器，輸入以下網址，開啟 [Google Cloud Shell](https://console.cloud.google.com/cloudshell/editor?cloudshell=true&shellonly=true)
+
+```
+https://console.cloud.google.com/cloudshell/editor?cloudshell=true&shellonly=true
+```
+
+在 Cloud Shell 中執行以下命令進入您的 Lab VM
+
+```bash=
+sh login.sh
+```
+
+__重要!!__ 進入 Lab VM 後，請記得先切換為 root user，以下示例皆以 root 設計
+
+```bash=
+sudo su 
+```
 
 ---
 
@@ -345,17 +372,40 @@ alpine              latest              5cb3aa00f899        2 weeks ago         
 
 Dockerfile語法很簡單。在這項任務中，我們將從Dockerfile創建一個簡單的 python 網頁站台
 
+---
+
+### 進入 Lab 環境
+
+請開啟一個新的瀏覽器，輸入以下網址，開啟 [Google Cloud Shell](https://console.cloud.google.com/cloudshell/editor?cloudshell=true&shellonly=true)
+
+```
+https://console.cloud.google.com/cloudshell/editor?cloudshell=true&shellonly=true
+```
+
+在 Cloud Shell 中執行以下命令進入您的 Lab VM
+
+```bash=
+sh login.sh
+```
+
+__重要!!__ 進入 Lab VM 後，請記得先切換為 root user，以下示例皆以 root 設計
+
+```bash=
+sudo su 
+```
+
+---
 ### 建立 Dockerfile
 
 讓我們看一下我們將要使用的Dockerfile，它構建了一個允許您發送推文的簡單網站。
 
-1. 請確認您在正在的目錄中
+切換您所在的目錄
 
 ```bash=
 cd ~/devops-hands-on/sample/hello
 ```
 
-2. 顯示Dockerfile的內容
+顯示Dockerfile的內容
 
 ```bash=
 cat Dockerfile
@@ -517,10 +567,39 @@ b8375e3ded63        f97dc95a465e        "python app.py"     2 hours ago         
 
 在開始之前，以下內容都會在 Linux 命令列上進行檔案的編修，如果您並不熟悉 Linux shell 指令操作，強烈建議您先閱讀[鳥哥的Linux > vim 程式編輯器](http://linux.vbird.org/linux_basic/0310vi.php#vi_ex)
 
+---
+
+### 進入 Lab 環境
+
+請開啟一個新的瀏覽器，輸入以下網址，開啟 [Google Cloud Shell](https://console.cloud.google.com/cloudshell/editor?cloudshell=true&shellonly=true)
+
+```
+https://console.cloud.google.com/cloudshell/editor?cloudshell=true&shellonly=true
+```
+
+在 Cloud Shell 中執行以下命令進入您的 Lab VM
+
+```bash=
+sh login.sh
+```
+
+__重要!!__ 進入 Lab VM 後，請記得先切換為 root user，以下示例皆以 root 設計
+
+```bash=
+sudo su 
+```
+
+---
+
 ### EXPOSE
 
 `EXPOSE` 指令，會宣告你的容器對外有那些通訊埠開啟，但此設定並不會對外服務，你還是要透過 `docker run -p` 的方式才能讓容器的通訊埠對外發佈服務
 
+切換您所在的目錄
+
+```bash=
+cd ~/devops-hands-on/sample/hello
+```
 修改您的 Dockerfile 
 
 ```bash=
@@ -625,7 +704,7 @@ curl localhost:5000
 
 ### VOLUME
 
-<<說明>>
+<說明>
 
 修改您的 Dockerfile 
 
@@ -744,6 +823,30 @@ INFO:root:f7cd97856867
 
 本階段會演示如何將你的映像檔(docker image)，推送至公開的 container repository 中。
 
+---
+
+### 進入 Lab 環境
+
+請開啟一個新的瀏覽器，輸入以下網址，開啟 [Google Cloud Shell](https://console.cloud.google.com/cloudshell/editor?cloudshell=true&shellonly=true)
+
+```
+https://console.cloud.google.com/cloudshell/editor?cloudshell=true&shellonly=true
+```
+
+在 Cloud Shell 中執行以下命令進入您的 Lab VM
+
+```bash=
+sh login.sh
+```
+
+__重要!!__ 進入 Lab VM 後，請記得先切換為 root user，以下示例皆以 root 設計
+
+```bash=
+sudo su 
+```
+
+---
+
 ### 設定Google Container Repository
 
 以下示例，我們使用了 Google Container Repository(GCR) 作為公開 repo。要使用 GCR，首先要啟用 `Google Container Repository API` 服務，輸入以下指令可協助你在命令列上啟用。
@@ -851,3 +954,20 @@ v3: digest: sha256:91702aac8a501bd2fa77bd58e032aa6168af6990b3d945b5c47ef364be937
 
 * __問題：__ 如何測試映像檔是否上傳成功？
 
+---
+
+## 清除 Lab  
+
+當您已經完成 Lab 後，建議您刪除已建立的 Lab 環境，以節省您的費用
+
+請先關閉您操作Lab的瀏覽器視窗，然後開啟一個新的瀏覽器視窗，輸入以下網址，開啟 [Google Cloud Shell](https://console.cloud.google.com/cloudshell/editor?cloudshell=true&shellonly=true)
+
+```
+https://console.cloud.google.com/cloudshell/editor?cloudshell=true&shellonly=true
+```
+
+輸入以下指令清除 Lab
+
+```bash=
+gcloud projects delete $GOOGLE_PROJECT_ID
+```
