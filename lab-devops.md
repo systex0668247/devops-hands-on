@@ -153,7 +153,7 @@ jenkins-56bbc5578-qkxlw   1/1     Running   0          1m
 
 ---
 
-### 取得入口 ip
+### 取得入口ip
 
 使用以下指令，找到 jenkins 對外服務的 ip-address
 ```bash=
@@ -339,47 +339,147 @@ node {
 
 ---
 
-## Task 3: DevOps style project (Docker)
+## Task 3: Pipeline as Code
 
-### DevOps 專案建議結構 ###
+本階段我們將試著將 Pipeline code 移轉至專案中，並讓 Jenkins 偵測 SCM 的變更。最終 Jenkins 會在原始碼變更後，依照專案中定義的 __Jenkinsfile__ 執行工作。
 
-#### Java Project Style
+---
+
+### Create DevOps Style Project
+
+在前一個 Task 我們在 Jenkins 中完成了第一個 Pipeline 專案。但真實的環境中，開發者(dev)是無法操作正式環境的CI/CD工具，慣例上，我們會將 Pipeline 的代碼，與專案的原始碼放在一起，如下所示
+
+#### Java project style sample
+
 <pre>
-└── <span style="color:red;font-weight: bold;">kubernetes/</span>
-    └── deployment.yaml
-    └── service.yaml
 └── <span style="color:blue">src/</span>
-    └── <span style="color:blue">java/com/systex/</span>
+    └── <span style="color:blue">main/java/com/systex/</span>
         └── HelloWorld.java   
-    └── <span style="color:blue">resources/</span>
-└── Dockerfile
 └── <span style="color:red;font-weight: bold;">Jenkinsfile</span>
 └── pom.xml
-└── <span style="color:red;font-weight: bold;">README.md</span>
+└── README.md
 </pre>
 
+* __`Jenkinsfile`__ 依照專案慣用的 CI/CD 工具，將 CI/CD pipeline 資訊放在專案的根目錄中是開發慣例(Best practice)。因為我們用的是 Jenkins Pipeline 所以檔案為 __`Jenkinsfile`__。其它常見的如 TravisCI的 `.travis.yml `.
 
-#### Python Project style 
-<pre>
-└── <span style="color:red;font-weight: bold;">kubernetes/</span>
-    └── deployment.yaml
-    └── service.yaml
-└── <span style="color:blue;">src/</span>
-    └── Hello.py
-└── Dockerfile</span>
-└── <span style="color:red;font-weight: bold;">Jenkinsfile</span>
-└── requirements.txt
-└── <span style="color:red;font-weight: bold;">README.md</span>
-</pre>
+* __`README.md`__ 在良好的開發/合作慣例下，一定要在專案根目錄中提供 __`README.md`__ 說明專案的內容資訊等等。
 
-基本上 Source Code Repository 中所有的內容都是由 Developer 所提供的，在良好的開發/合作慣例下，一定要在專案根目錄中提供 `README.md` 說明專案的內容資訊等等。
+---
 
-`kubernetes/` 目錄內包含所有 kubernetes 的設定資訊(option)
-`Jenkinsfile` 依照專案慣用的 CI/CD 工具，將CI/CD pipeline 資訊放在專案的根目錄中，因為我們用的是 Jenkins Pipeline 所以檔案為 Jenkinsfile (option)
+#### 
 
-以上專案架構上的建構，實際如何應用設置，當然可以不同，但仍強烈建議將協作方式明確記載在 `README.md` 檔案中 (或 `CONTRIBUTING.md`)
+1. 請返回 Jenkins 主頁面，如果您忘 Jenkins 入口位置，請返回 Task 1: [取得入口ip](#取得入口ip) 依指示查找。
 
-為專案提供 pipeline 
+2. 請點擊左上角 ![New Item](https://github.com/abola/devops-hands-on/raw/master/images/devops-new-item.png =150x) 建立新的專案
+
+3. 在接下來的畫面中，請輸入您的專案名稱為 `pipeline-as-code`，並在下選專案的類別選擇 `Pipeline`，在畫面的最下方，點擊 `OK` 進入下一步
+
+4. 在頁面的最下方，`Pipeline > Script` 項目的文字輸入框中輸入以下內容
+
+```pipeline=
+node {
+    stage('init'){
+        git 'https://github.com/<your_github_account>/devops-lab-sample.git'
+    }
+    stage('build'){
+        sh 'cd sample/pipeline-as-code && mvn package'
+    }
+    stage('exec'){
+        sh 'cd sample/pipeline-as-code && java -cp target/hello-1.0.jar com.systex.HelloWorld'
+    }
+}
+```
+
+簡單解釋 Pipeline 中執行的內容 
+
+* `stage('init')` 會去您的 GitHub 抓取原始碼，請記得修改 __<your_github_account>__ 成為您的 GitHub 帳號
+* `stage('build')` 會切換至專案目錄中，依照 `pom.xml` 的內容打包 Java 專案
+* `stage('exec')` 執行編譯後的結果，最終應該會顯示 Hello World!.
+
+5. 請按畫面最下方 `Save` 儲存
+
+---
+
+### 測試 Pipeline 
+
+1. 接著您會在專案的畫面中，請點擊左側 ![Build Now](https://github.com/abola/devops-hands-on/raw/master/images/devops-build-now.png =135x) 
+靜候專案建置完成，如果您的三個關卡(stage)都正常完成，如下圖
+![Pipeline check](https://github.com/abola/devops-hands-on/raw/master/images/devops-pipeline-check.png) 
+
+表示您的 pipeline code 無誤，接著我們可以移轉至原始碼。
+
+---
+
+### 移轉 Pipeline 至原始碼
+
+1. 請另開新視窗，至 GitHub 網站並開啟您的專案，網址參考以下，並更換為您的帳號
+```
+https://github.com/<your_github_account>/devops-lab-sample
+```
+
+2. 切換至目錄 `sample/pipeline-as-code` 下，您現在的畫面應該類似下圖 
+![Pipeline check](https://github.com/abola/devops-hands-on/raw/master/images/devops-github-pac.png) 
+
+3. 點擊畫面上方偏右的按鍵 `Create new file`
+4. 在接下來的畫面中，請將檔名命名為 `Jenkinsfile` 
+5. 將先前設定於 Jenkins 中的 Pipeline code 貼上，您可以參考以下內容，同樣請記得更換 __<your_github_account>__
+```pipeline=
+node {
+    stage('init'){
+        git 'https://github.com/<your_github_account>/devops-lab-sample.git'
+    }
+    stage('build'){
+        sh 'cd sample/pipeline-as-code && mvn package'
+    }
+    stage('exec'){
+        sh 'cd sample/pipeline-as-code && java -cp target/hello-1.0.jar com.systex.HelloWorld'
+    }
+}
+```
+現在您的畫面應該類似下圖
+![GitHub-Jenkinsfile](https://github.com/abola/devops-hands-on/raw/master/images/devops-github-jenkinsfile.png)
+6. 切換至頁面的最下方，點擊 `Commit new file` 存檔
+7. 返回 Jenkins 視窗，在頁面的左側![Configure](https://github.com/abola/devops-hands-on/raw/master/images/devops-configure.png =135x)進入專案設定畫面
+8. 勾選`Poll SCM`(或中文`輪詢 SCM`)，並在 `Schedule`文字輸入框中輸入 `* * * * *` 代表每分鐘都會詢問 SCM，但只有在有變更時，才會觸發建置，完成設定如下圖
+![Poll-SCM](https://github.com/abola/devops-hands-on/raw/master/images/devops-poll-scm.png)
+9. 接著再至頁面下方 Pipeline 區塊，變更下拉功能`Definition` 至 `Pipeline script from SCM`
+10. 子項目 `SCM` 的下拉選單由 `None` 變更為 `Git`
+11. `SCM` 子項目 `Repository URL` 請輸入以下網址，請記得更換 __`<your_github_account>`__
+```
+https://github.com/<your_github_account>/devops-lab-sample.git
+```
+11. `Script Path` 項目，請輸入 `sample/pipeline-as-code/Jenkinsfile`，指向先前建立的 `Jenkinsfile` 的相對路徑
+12. 確認您的設定畫面如下圖
+![Configure](https://github.com/abola/devops-hands-on/raw/master/images/devops-config-pac.png)
+13. 按下方 `Save` 儲存設定後離開
+
+---
+
+### 測試自動化建置
+
+現在要返回您的 GitHub 頁面，修改 HelloWorld.java  以觸發 Jenkins 作業完成本階段作業 
+
+1. 開啟以下網址，同樣請記得更換 __<your_github_account>__
+```
+https://github.com/<your_github_account>/devops-lab-sample/tree/master/sample/pipeline-as-code/src/main/java/com/systex
+```
+2. 點擊 HelloWorld.java 
+3. 點擊畫面右側功能，編輯檔案
+![Configure](https://github.com/abola/devops-hands-on/raw/master/images/devops-github-edit.png =300x)
+4. 隨意修改Hello World! 輸出內容，參考如下
+```java=
+package com.systex;
+
+public class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello World! Hello World!");
+    }
+}
+```
+5. 修改後，點擊畫面最下方 `Commit Changes` 儲存
+6. 返回 Jenkins 靜候約一分鐘內，建置會自行啟動，並完成所有 Pipeline 中定義的工作。
+
+
 
 ---
 
@@ -395,3 +495,39 @@ node {
 # Monitoring
 
 離開Jenkins
+
+<pre>
+└── <span style="color:red;font-weight: bold;">kubernetes/</span>
+└── <span style="color:blue">src/</span>
+    └── <span style="color:blue">java/com/systex/</span>
+        └── HelloWorld.java   
+    └── <span style="color:blue">resources/</span>
+└── Dockerfile
+└── Jenkinsfile
+└── pom.xml
+</pre>
+
+
+
+#### Python Project style
+
+<pre>
+└── <span style="color:red;font-weight: bold;">kubernetes/</span>
+    └── deployment.yaml
+    └── service.yaml
+└── <span style="color:blue;">src/</span>
+    └── Hello.py
+└── Dockerfile</span>
+└── <span style="color:red;font-weight: bold;">Jenkinsfile</span>
+└── requirements.txt
+└── <span style="color:red;font-weight: bold;">README.md</span>
+</pre>
+
+基本上 Source Code Repository 中所有的內容都是由 Developer 所提供的，在良好的開發/合作慣例下，一定要在專案根目錄中提供 `README.md` 說明專案的內容資訊等等。
+
+`kubernetes/` 目錄內包含所有 kubernetes 的設定資訊(option)
+
+
+以上專案架構上的建構，實際如何應用設置，當然可以不同，但仍強烈建議將協作方式明確記載在 `README.md` 檔案中 (或 `CONTRIBUTING.md`)
+
+為專案提供 pipeline 
