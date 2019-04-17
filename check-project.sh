@@ -23,6 +23,7 @@ checkProject() {
   fi
 
   gcloud config set project $GOOGLE_PROJECT_ID
+  echo "GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID" | tee -a ~/.profile
 }
 
 checkProject
