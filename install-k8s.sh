@@ -37,6 +37,7 @@ initParameter() {
   if [ -z $GOOGLE_PROJECT_ID  ]; then
     # GOOGLE_PROJECT_ID=systex-lab-$(cat /proc/sys/kernel/random/uuid | cut -b -6)
     echo "  未定義 GOOGLE_PROJECT_ID." 
+    exit
   else
     echo "  系統參數 GOOGLE_PROJECT_ID  已設定...........(GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID)" 
   fi
