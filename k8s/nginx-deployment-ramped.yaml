@@ -5,18 +5,17 @@ metadata:
 spec:
  selector:
    matchLabels:
-     app: nginx
+     app: myweb
  strategy:
    type: RollingUpdate
  replicas: 2 
  template: 
    metadata:
      labels:
-       app: nginx
-       tag: myweb
+       app: myweb
    spec:
      containers:
-     - name: nginx
+     - name: myweb
        image: nginx:1.7.9
        ports:
        - containerPort: 80
