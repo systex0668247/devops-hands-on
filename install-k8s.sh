@@ -31,10 +31,13 @@ checkGcloudLogin() {
 initParameter() {
   echo "參數設定確認中..."
   
+  GOOGLE_PROJECT_ID=$(gcloud config get-value project)
+  
   # GOOGLE_PROJECT_ID
   if [ -z $GOOGLE_PROJECT_ID  ]; then
-    GOOGLE_PROJECT_ID=systex-lab-$(cat /proc/sys/kernel/random/uuid | cut -b -6)
-    echo "  未定義 GOOGLE_PROJECT_ID.   由系統自動產生...(GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID)" 
+    # GOOGLE_PROJECT_ID=systex-lab-$(cat /proc/sys/kernel/random/uuid | cut -b -6)
+    echo "  未定義 GOOGLE_PROJECT_ID." 
+    exit
   else
     echo "  系統參數 GOOGLE_PROJECT_ID  已設定...........(GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID)" 
   fi
@@ -63,7 +66,7 @@ initParameter() {
 
   # GOOGLE_GCE_IMAGE
   if [ -z $GOOGLE_GKE_VERSION  ]; then
-    GOOGLE_GKE_VERSION=1.11.7-gke.12
+    GOOGLE_GKE_VERSION=1.11.8-gke.6
     echo "  未定義 GOOGLE_GKE_VERSION.  使用預設值.......(GOOGLE_GKE_VERSION=$GOOGLE_GKE_VERSION)"
   fi
 
