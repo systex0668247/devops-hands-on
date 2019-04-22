@@ -85,7 +85,7 @@ installKubectl() {
 createProject() {
   echo "正在建立GCP 專案..."
     gcloud projects create $GOOGLE_PROJECT_ID > /dev/null 2>&1
-    echo "export \$(cat .my-env|xargs)" | tee -a ~/.profile
+    echo "export \$(cat .my-env|xargs)" | tee -a ~/.profile > /dev/null 2>&1
     
     BILLING_ACCOUNT=$(gcloud beta billing accounts list | grep True | awk -F" " '{print $1}')
     gcloud beta billing projects link $GOOGLE_PROJECT_ID --billing-account $BILLING_ACCOUNT > /dev/null 2>&1
@@ -100,7 +100,7 @@ createK8S() {
   printf "  開始建立 GKE($GOOGLE_GKE_NAME)..."
   if [ $(gcloud container clusters list --project=$GOOGLE_PROJECT_ID | grep $GOOGLE_GKE_NAME | wc -l) -eq 0 ]; then
     gcloud container clusters create $GOOGLE_GKE_NAME \
-        --project=$GOOGLE_PROJECT_ID
+        --project=$GOOGLE_PROJECT_ID \
         --machine-type=$GOOGLE_GKE_MACHINE \
         --region=$GOOGLE_ZONE \
         --num-nodes=1 \
