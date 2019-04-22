@@ -127,6 +127,8 @@ createK8S
 
 > ~/.my-env
 echo "GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID" >> ~/.my-env
+echo "GOOGLE_ZONE=$GOOGLE_ZONE" >> ~/.my-env
+
 
 cat <<EOF
 ----------------------------------------
