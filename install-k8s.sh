@@ -95,7 +95,7 @@ createK8S() {
   echo "正在建立GKE..."
   
   printf "  啟用 Container API..."
-  gcloud services enable container.googleapis.com
+  gcloud services enable container.googleapis.com && echo "完成"
 
   printf "  開始建立 GKE($GOOGLE_GKE_NAME)..."
   if [ $(gcloud container clusters list --project=$GOOGLE_PROJECT_ID | grep $GOOGLE_GKE_NAME | wc -l) -eq 0 ]; then
@@ -103,8 +103,8 @@ createK8S() {
         --machine-type=$GOOGLE_GKE_MACHINE \
         --region=$GOOGLE_ZONE \
         --num-nodes=1 \
-        --cluster-version=$GOOGLE_GKE_VERSION \
-        > /dev/null 2>&1 && echo "完成"
+        --cluster-version=$GOOGLE_GKE_VERSION 
+    echo "完成"
   else
     echo "已存在"
   fi
