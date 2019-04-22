@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: nginx-deployment-myweb
+spec:
+ selector:
+   matchLabels:
+     app: myweb
+ strategy:
+   type: RollingUpdate
+ replicas: 2 
+ template: 
+   metadata:
+     labels:
+       app: myweb
+   spec:
+     containers:
+     - name: myweb
+       image: nginx:1.7.9
+       ports:
+       - containerPort: 80

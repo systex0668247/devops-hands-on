@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: myweb-v2
+spec:
+ selector:
+   matchLabels:
+     app: myweb
+ strategy:
+   type: RollingUpdate
+ replicas: 2 
+ template: 
+   metadata:
+     labels:
+       app: myweb
+       version: v2
+   spec:
+     containers:
+     - name: myweb
+       image: tomcat:8.0
+       ports:
+       - containerPort: 8080
