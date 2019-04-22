@@ -100,6 +100,7 @@ createK8S() {
   printf "  開始建立 GKE($GOOGLE_GKE_NAME)..."
   if [ $(gcloud container clusters list --project=$GOOGLE_PROJECT_ID | grep $GOOGLE_GKE_NAME | wc -l) -eq 0 ]; then
     gcloud container clusters create $GOOGLE_GKE_NAME \
+        --project=$GOOGLE_PROJECT_ID
         --machine-type=$GOOGLE_GKE_MACHINE \
         --region=$GOOGLE_ZONE \
         --num-nodes=1 \
