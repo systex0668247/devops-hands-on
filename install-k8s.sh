@@ -37,12 +37,6 @@ initParameter() {
   if [ -z $GOOGLE_PROJECT_ID  ]; then
     GOOGLE_PROJECT_ID=systex-lab-$(cat /proc/sys/kernel/random/uuid | cut -b -6)
     echo "  未定義 GOOGLE_PROJECT_ID.   由系統自動產生...(GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID)" 
-    
-    gcloud projects create $GOOGLE_PROJECT_ID    
-    echo "export \$(cat .my-env|xargs)" | tee -a ~/.profile
-    
-    BILLING_ACCOUNT=$(gcloud beta billing accounts list | grep True | awk -F" " '{print $1}')
-    gcloud beta billing projects link $GOOGLE_PROJECT_ID --billing-account $BILLING_ACCOUNT
   else
     echo "  系統參數 GOOGLE_PROJECT_ID  已設定...........(GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID)" 
   fi
@@ -88,6 +82,14 @@ installKubectl() {
   yum -y install kubectl > /dev/null 2>&1 && echo "完成"
 }
 
+createProject() {
+  echo "正在建立GCP 專案..."
+    gcloud projects create $GOOGLE_PROJECT_ID > /dev/null 2>&1
+    echo "export \$(cat .my-env|xargs)" | tee -a ~/.profile
+    
+    BILLING_ACCOUNT=$(gcloud beta billing accounts list | grep True | awk -F" " '{print $1}')
+    gcloud beta billing projects link $GOOGLE_PROJECT_ID --billing-account $BILLING_ACCOUNT > /dev/null 2>&1
+}
 
 createK8S() {
   echo "正在建立GKE..."
@@ -96,7 +98,7 @@ createK8S() {
   gcloud services enable container.googleapis.com
 
   printf "  開始建立 GKE($GOOGLE_GKE_NAME)..."
-  if [ $(gcloud container clusters list  | grep $GOOGLE_GKE_NAME | wc -l) -eq 0 ]; then
+  if [ $(gcloud container clusters list --project=$GOOGLE_PROJECT_ID | grep $GOOGLE_GKE_NAME | wc -l) -eq 0 ]; then
     gcloud container clusters create $GOOGLE_GKE_NAME \
         --machine-type=$GOOGLE_GKE_MACHINE \
         --region=$GOOGLE_ZONE \
@@ -120,6 +122,7 @@ createK8S() {
 #checkGcloudLogin
 initParameter
 #installKubectl
+createProject
 createK8S
 
 > ~/.myenv
