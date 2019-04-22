@@ -59,6 +59,7 @@ sudo su
 yum install -y yum-utils device-mapper-persistent-data lvm2 git
 yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 yum install -y docker-ce docker-ce-cli containerd.io
+systemctl enable docker
 systemctl start docker
 ```
 
@@ -628,7 +629,7 @@ CMD ["app.py"]
 docker build -t myapp:v2 . 
 ```
 
-現在我們可以同時啟動兩個不同版本的 `myapp` 比較差異
+現在我們可以同時啟動兩個不同版本的 `myapp` 比較差異，使用 `docker ps` 觀察
 
 ```bash=
 docker run -d myapp:v1
@@ -649,11 +650,11 @@ af5ea393185c        myapp:v1            "python app.py"     6 seconds ago       
 docker run -d -P myapp:v2
 ```
 
-觀察 `docker ps` 現在我們有三個容器運行中，其中有一個容器有連接對外服務 `0.0.0.0:32769`
+觀察 `docker ps` 現在我們有三個容器運行中，其中有一個容器有連接對外服務 `0.0.0.0:32768`
 
 ```
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS                     NAMES
-72346620f65c        myapp:v2            "python app.py"     3 seconds ago       Up 1 second         0.0.0.0:32769->5000/tcp   boring_austin
+72346620f65c        myapp:v2            "python app.py"     3 seconds ago       Up 1 second         0.0.0.0:32768->5000/tcp   boring_austin
 45ff6b03b162        myapp:v2            "python app.py"     5 minutes ago       Up 5 minutes        5000/tcp                  competent_dubinsky
 af5ea393185c        myapp:v1            "python app.py"     5 minutes ago       Up 5 minutes                                  blissful_gauss
 ```
@@ -661,12 +662,16 @@ af5ea393185c        myapp:v1            "python app.py"     5 minutes ago       
 簡易測試運作是否正常的，這時的通訊埠要指定至隨機分配的埠，成功你應該可看到 `Hello World!!!`
 
 ```bash=
-curl localhost:32769
+curl localhost:32768
 ```
 
 不論你是否有宣告 `EXPOSE` ，其實仍然可以使用 `docker run -p` 直接指定通訊埠的分配
 
-你可以先中止已啟動的容器，再進入下一步。
+進入下一步前，請先清除運行中的 Docker
+
+```bash=
+docker rm $(docker ps -aq) --force
+```
 
 ### ENTRYPOINT 與 CMD
 
@@ -701,6 +706,12 @@ curl localhost:5000
 ```
 
 成功你應該可看到 `Replaced Hello World~~~`
+
+進入下一步前，請先清除運行中的 Docker
+
+```bash=
+docker rm $(docker ps -aq) --force
+```
 
 ### VOLUME
 
@@ -848,6 +859,12 @@ sudo su
 ---
 
 ### 設定Google Container Repository
+
+登入 gcloud
+
+```bash=
+gcloud auth login
+```
 
 以下示例，我們使用了 Google Container Repository(GCR) 作為公開 repo。要使用 GCR，首先要啟用 `Google Container Repository API` 服務，輸入以下指令可協助你在命令列上啟用。
 
