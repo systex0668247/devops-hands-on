@@ -125,8 +125,8 @@ initParameter
 createProject
 createK8S
 
-> ~/.myenv
-echo "GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID" >> ~/.myenv
+> ~/.my-env
+echo "GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID" >> ~/.my-env
 
 cat <<EOF
 ----------------------------------------
