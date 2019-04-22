@@ -31,20 +31,25 @@ checkGcloudLogin() {
 initParameter() {
   echo "參數設定確認中..."
   
-  GOOGLE_PROJECT_ID=$(gcloud config get-value project)
+  GOOGLE_PROJECT_ID=$(gcloud projects list --filter=systex-lab  | awk 'END {print $1}')
   
   # GOOGLE_PROJECT_ID
   if [ -z $GOOGLE_PROJECT_ID  ]; then
-    # GOOGLE_PROJECT_ID=systex-lab-$(cat /proc/sys/kernel/random/uuid | cut -b -6)
-    echo "  未定義 GOOGLE_PROJECT_ID." 
-    exit
+    GOOGLE_PROJECT_ID=systex-lab-$(cat /proc/sys/kernel/random/uuid | cut -b -6)
+    echo "  未定義 GOOGLE_PROJECT_ID.   由系統自動產生...(GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID)" 
+    
+    gcloud projects create $GOOGLE_PROJECT_ID    
+    echo "export \$(cat .my-env|xargs)" | tee -a ~/.profile
+    
+    BILLING_ACCOUNT=$(gcloud beta billing accounts list | grep True | awk -F" " '{print $1}')
+    gcloud beta billing projects link $GOOGLE_PROJECT_ID --billing-account $BILLING_ACCOUNT
   else
     echo "  系統參數 GOOGLE_PROJECT_ID  已設定...........(GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID)" 
   fi
   
   # GOOGLE_ZONE
   if [ -z $GOOGLE_ZONE  ]; then
-    GOOGLE_ZONE=asia-east1-a
+    GOOGLE_ZONE=asia-east1-$(ary=(a b c) && echo ${ary[$(($RANDOM%3))]})
     echo "  未定義 GOOGLE_ZONE.         使用預設值.......(GOOGLE_ZONE=$GOOGLE_ZONE)"
   else
     echo "  系統參數 GOOGLE_ZONE        已設定...........(GOOGLE_ZONE=$GOOGLE_ZONE)" 
@@ -91,16 +96,22 @@ createK8S() {
   gcloud services enable container.googleapis.com
 
   printf "  開始建立 GKE($GOOGLE_GKE_NAME)..."
-  gcloud container clusters create $GOOGLE_GKE_NAME \
-      --machine-type=$GOOGLE_GKE_MACHINE \
-      --region=$GOOGLE_ZONE \
-      --num-nodes=1 \
-      --cluster-version=$GOOGLE_GKE_VERSION 
-
+  if [ $(gcloud container clusters list  | grep $GOOGLE_GKE_NAME | wc -l) -eq 0 ]; then
+    gcloud container clusters create $GOOGLE_GKE_NAME \
+        --machine-type=$GOOGLE_GKE_MACHINE \
+        --region=$GOOGLE_ZONE \
+        --num-nodes=1 \
+        --cluster-version=$GOOGLE_GKE_VERSION \
+        > /dev/null 2>&1 && echo "完成"
+  else
+    echo "已存在"
+  fi
+  
   printf "  正在設定授權..."
   kubectl create clusterrolebinding cluster-admin-binding \
     --clusterrole=cluster-admin \
-    --user=$(gcloud config get-value core/account)
+    --user=$(gcloud config get-value core/account)\
+    > /dev/null 2>&1 && echo "完成"
 
 }
 
@@ -111,12 +122,20 @@ initParameter
 #installKubectl
 createK8S
 
+> ~/.myenv
+echo "GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID" >> ~/.myenv
+
 cat <<EOF
 ----------------------------------------
 環境安裝完成
 ----------
-GKE 叢集名稱: $GOOGLE_PROJECT_ID
+GCP 專案名稱: $GOOGLE_PROJECT_ID
+GKE 叢集名稱: $GOOGLE_GKE_NAME
 GKE 地區    : $GOOGLE_ZONE
 GKE 版本    : $GOOGLE_GKE_VERSION
+----------------------------------------
+請執行以下指令，完成環境設置
+-----------------------
+export \$(cat .my-env|xargs)
 ----------------------------------------
 EOF
