@@ -284,7 +284,7 @@ Master:
 
 Agent:
   Enabled: true
-  Image: gcr.io/my-jenkins-20190320/jnlp-slave-docker-k8s
+  Image: gcr.io/devops-handsup-201904/jnlp-slave-docker-k8s
   ImageTag: latest
   CustomJenkinsLabels: []
 # ImagePullSecret: jenkins
@@ -295,8 +295,8 @@ Agent:
       cpu: "200m"
       memory: "256Mi"
     limits:
-      cpu: "500m"
-      memory: "512Mi"
+      cpu: "1000m"
+      memory: "1Gi"
   # You may want to change this to true while testing a new image
   AlwaysPullImage: false
   # Controls how slave pods are retained after the Jenkins build completes

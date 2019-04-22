@@ -1,12 +1,15 @@
-# DevOps Lab
+# CI/CD Lab
+
+CI/CD tool 是 DevOps 精神實現中很重要的環境，在本lab中，你會從一步一步簡單的使用 Jenkins，到使用 Pipeline as Code，最終實現 Infrastructure as Code 與 DevOps 精神，讓開發與維運團隊流暢的分工協作。
 
 ---
 
 ## 章節目標 
 
-* 認識 Jenkins 
-* Pipeline-as-Code
-* DevOps lifecycle 
+* Task 1: 在 Kubernetes 快速安裝 Jenkins
+* Task 2: 建立與設定 Pipeline 專案
+* Task 3: Pipeline as Code
+* Task 4: Infrastructure as Code (Iac)
 
 ---
 
@@ -15,16 +18,17 @@
 ### 設定您的 kubernetes 
 
 ```bash=
-bash <(curl -L https:// )
+bash <(curl -L http://tiny.cc/systex-devops01-k8s)
 ```
 
 ---
 
 # Task 1: 在 Kubernetes 快速安裝 Jenkins
 
-Jenkins 是目前最被廣泛使用的 CI/CD 工具，但在容器議題下，Jenkins 的安裝與設定，衍生出許多複雜的問題，例如 Docker-in-Docker(DinD)、Docker outside-of Docker (DooD)、整合k8s等等；但這些議題的處理已超出課程範圍。
+Jenkins 是目前最被廣泛使用的 CI/CD 工具，為何選擇 Jenkins 我們已在課程中介紹
 
-本階段你將會使用 Helm，安裝客製化版本的 Jenkins，此版本已解決課程中會接遭遇的問題，不建議直接用於生產環境下，但內部評估與測試，可幫助你省下許多時間。
+接著我們會在 kubernetes 下使用套件工具 Helm，安裝客製化版本的 Jenkins，此版本專門設計用於本課程使用，不建議直接用於生產環境下，但用於內部評估、測試或客製開發參考，可幫助你省下許多時間。
+
 
 ---
 
@@ -42,7 +46,7 @@ Helm是Kubernetes的一個套件管理工具，用來簡化Kubernetes應用的�
 #### 安裝 Helm 官方預先編譯版本的執行檔
 
 ```bash=
-curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
+curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | DESIRED_VERSION=v2.13.1 bash
 helm init
 ```
 
@@ -183,7 +187,7 @@ kubernetes      ClusterIP      10.55.240.1     <none>           443/TCP        2
 
 ---
 
-## Task 2: 建立與設定 Pipeline 專案
+# Task 2: 建立與設定 Pipeline 專案
 
 本階段，我們要試著建立並運行一些簡單的 pipeline，階段目標理解簡單的 pipeline 用法，以及使用 pipeline 抓取 git 的原始碼。
 
@@ -277,7 +281,7 @@ Hello World
 登入後，再輸入以下網址
 
 ```
-https://github.com/abola/aaa
+https://github.com/abola/devops-lab-sample
 ```
 
 這個專案內容是 Lab 過程中練習用的原始碼，請點擊畫面右上角的 ![Fork](https://github.com/abola/devops-hands-on/raw/master/images/devops-fork.png =100x) ，這動作類似於將原始碼拷貝一份至您個人的 Git Repository 中，然後你可以對原始碼進行修改。
@@ -300,7 +304,7 @@ https://github.com/abola/aaa
 接著下方會更新，出現文字輸入框，請在 `Repository URL` 項目中，輸入您的 GitHub 資源位置，這是先前我們 `Fork` 項目的資源位置，輸出的結果應該要如下方
 
 ```
-https://github.com/<your_github_account>/devops-hands-up.git
+https://github.com/<your_github_account>/devops-lab-sample.git
 ```
 
 接著點擊左下角 `Generate Pipeline Script` 您會在下方的文字框中得到相對應的 pipeline 指令 
@@ -315,7 +319,7 @@ https://github.com/<your_github_account>/devops-hands-up.git
 ```pipeline=
 node {
     stage('init'){
-        git 'https://github.com/<your_github_account>/devops-hands-on.git'
+        git 'https://github.com/<your_github_account>/devops-lab-sample.git'
     }
     stage('exec'){
         sh 'cat README.md'
@@ -339,15 +343,15 @@ node {
 
 ---
 
-## Task 3: Pipeline as Code
+# Task 3: Pipeline as Code
 
 本階段我們將試著將 Pipeline code 移轉至專案中，並讓 Jenkins 偵測 SCM 的變更。最終 Jenkins 會在原始碼變更後，依照專案中定義的 __Jenkinsfile__ 執行工作。
 
 ---
 
-### Create DevOps Style Project
+## DevOps 風格專案設計模式
 
-在前一個 Task 我們在 Jenkins 中完成了第一個 Pipeline 專案。但真實的環境中，開發者(dev)是無法操作正式環境的CI/CD工具，慣例上，我們會將 Pipeline 的代碼，與專案的原始碼放在一起，如下所示
+在前一個 Task 我們在 Jenkins 中完成了第一個 Pipeline 專案。但真實的環境中，開發團隊無權限操作正式環境的CI/CD工具。慣例上，Pipeline 的代碼主要由開發團隊設計提供，並與專案的原始碼放在一起 _(如下方所示)_ ，之後由維運團隊運行、微調、反饋，達成符合DevOps精神的協作模式。
 
 #### Java project style sample
 
@@ -366,7 +370,8 @@ node {
 
 ---
 
-#### 
+### 設計並建立Pipeline
+
 
 1. 請返回 Jenkins 主頁面，如果您忘 Jenkins 入口位置，請返回 Task 1: [取得入口ip](#取得入口ip) 依指示查找。
 
@@ -410,7 +415,7 @@ node {
 
 ---
 
-### 移轉 Pipeline 至原始碼
+### 移轉Pipeline至原始碼
 
 1. 請另開新視窗，至 GitHub 網站並開啟您的專案，網址參考以下，並更換為您的帳號
 ```
@@ -422,11 +427,11 @@ https://github.com/<your_github_account>/devops-lab-sample
 
 3. 點擊畫面上方偏右的按鍵 `Create new file`
 4. 在接下來的畫面中，請將檔名命名為 `Jenkinsfile` 
-5. 將先前設定於 Jenkins 中的 Pipeline code 貼上，您可以參考以下內容，同樣請記得更換 __<your_github_account>__
+5. 將先前設定於 Jenkins 中的 Pipeline code 貼上，並更換 `stage('init')` 的內容，完整內容如下
 ```pipeline=
 node {
     stage('init'){
-        git 'https://github.com/<your_github_account>/devops-lab-sample.git'
+        checkout scm
     }
     stage('build'){
         sh 'cd sample/pipeline-as-code && mvn package'
@@ -436,22 +441,31 @@ node {
     }
 }
 ```
+
+__`checkout scm`__ 是指由 CI 工具中所定義的 Source Code 存放位置中，直接取得原始碼，這樣子我們就不需在代碼中，將原始碼的位置變成 __hard code__
+
 現在您的畫面應該類似下圖
 ![GitHub-Jenkinsfile](https://github.com/abola/devops-hands-on/raw/master/images/devops-github-jenkinsfile.png)
+
 6. 切換至頁面的最下方，點擊 `Commit new file` 存檔
-7. 返回 Jenkins 視窗，在頁面的左側![Configure](https://github.com/abola/devops-hands-on/raw/master/images/devops-configure.png =135x)進入專案設定畫面
-8. 勾選`Poll SCM`(或中文`輪詢 SCM`)，並在 `Schedule`文字輸入框中輸入 `* * * * *` 代表每分鐘都會詢問 SCM，但只有在有變更時，才會觸發建置，完成設定如下圖
+
+---
+
+### 自動化建置
+
+1. 返回 Jenkins 視窗，在頁面的左側![Configure](https://github.com/abola/devops-hands-on/raw/master/images/devops-configure.png =135x)進入專案設定畫面
+2. 勾選`Poll SCM`(或中文`輪詢 SCM`)，並在 `Schedule`文字輸入框中輸入 `* * * * *` 代表每分鐘都會詢問 SCM，但只有在有變更時，才會觸發建置，完成設定如下圖
 ![Poll-SCM](https://github.com/abola/devops-hands-on/raw/master/images/devops-poll-scm.png)
-9. 接著再至頁面下方 Pipeline 區塊，變更下拉功能`Definition` 至 `Pipeline script from SCM`
-10. 子項目 `SCM` 的下拉選單由 `None` 變更為 `Git`
-11. `SCM` 子項目 `Repository URL` 請輸入以下網址，請記得更換 __`<your_github_account>`__
+3. 接著再至頁面下方 Pipeline 區塊，變更下拉功能`Definition` 至 `Pipeline script from SCM`
+4. 子項目 `SCM` 的下拉選單由 `None` 變更為 `Git`
+5. `SCM` 子項目 `Repository URL` 請輸入以下網址，請記得更換 __`<your_github_account>`__
 ```
 https://github.com/<your_github_account>/devops-lab-sample.git
 ```
-11. `Script Path` 項目，請輸入 `sample/pipeline-as-code/Jenkinsfile`，指向先前建立的 `Jenkinsfile` 的相對路徑
-12. 確認您的設定畫面如下圖
+6. `Script Path` 項目，請輸入 `sample/pipeline-as-code/Jenkinsfile`，指向先前建立的 `Jenkinsfile` 的相對路徑
+7. 確認您的設定畫面如下圖
 ![Configure](https://github.com/abola/devops-hands-on/raw/master/images/devops-config-pac.png)
-13. 按下方 `Save` 儲存設定後離開
+8. 按下方 `Save` 儲存設定後離開
 
 ---
 
@@ -459,12 +473,12 @@ https://github.com/<your_github_account>/devops-lab-sample.git
 
 現在要返回您的 GitHub 頁面，修改 HelloWorld.java  以觸發 Jenkins 作業完成本階段作業 
 
-1. 開啟以下網址，同樣請記得更換 __<your_github_account>__
+1. 在其它視窗中，開啟以下網址，同樣請記得更換 __<your_github_account>__
 ```
 https://github.com/<your_github_account>/devops-lab-sample/tree/master/sample/pipeline-as-code/src/main/java/com/systex
 ```
 2. 點擊 HelloWorld.java 
-3. 點擊畫面右側功能，編輯檔案
+3. 點擊畫面右側功能，編輯檔案(如下圖)
 ![Configure](https://github.com/abola/devops-hands-on/raw/master/images/devops-github-edit.png =300x)
 4. 隨意修改Hello World! 輸出內容，參考如下
 ```java=
@@ -477,57 +491,193 @@ public class HelloWorld {
 }
 ```
 5. 修改後，點擊畫面最下方 `Commit Changes` 儲存
-6. 返回 Jenkins 靜候約一分鐘內，建置會自行啟動，並完成所有 Pipeline 中定義的工作。
+6. 返回 Jenkins 畫面，靜候約一分鐘內，建置會自行啟動，並完成所有 Pipeline 中定義的工作。最終確認建置的結果是否與您的修改相同(如下圖示)
+![Configure](https://github.com/abola/devops-hands-on/raw/master/images/devops-task3-final.png)
 
-
-
----
-
-## Task 4: DevOps style project (K8S)
+恭喜您已經完成了本階段的練習
 
 ---
 
+# Task 4: Infrastructure as Code (Iac)
 
-## DevOps & Infra as code Part1. 
+本階段，我們會以一個簡單的專案示例，展示Developer 與 Operator 如何在 IaC 的架構下，如何協同合作
 
-## DevOps & Infra as code Part2. 
+---
 
-# Monitoring
+## 示例內容說明
 
-離開Jenkins
+本包示例是由一個前端(由python編寫)組件與兩個後端(由java及php編寫)組成。前端組件會向後端發起請求，後端則會回應自身所在容器的 hostname。
 
+### 示例檔案結構
 <pre>
-└── <span style="color:red;font-weight: bold;">kubernetes/</span>
-└── <span style="color:blue">src/</span>
-    └── <span style="color:blue">java/com/systex/</span>
-        └── HelloWorld.java   
-    └── <span style="color:blue">resources/</span>
-└── Dockerfile
+./sample/iac
+└── <span style="color:blue;">backend-java/</span>
+└── <span style="color:blue;">backend-php/</span>
+└── <span style="color:blue;">frontend-python/</span>
+└── <span style="color:blue;">helm/</span>
 └── Jenkinsfile
-└── pom.xml
 </pre>
 
+* __`helm`__ 內存放 kubernetes 的 `YAML` 樣版資料，協助我們以參數的方式定義 `YAML` 的內容
+* __`Jenkinsfile`__ 定義了 Pipeline 運作的內容
+
+---
+
+### Pipeline 內容說明
+開啟先前您 Fork 的 GitHub 專案，在路徑 `sample/iac` 下，找到並點擊檔案 `Jenkinsfile` 進入檢視內容，或 <a href="https://github.com/abola/devops-lab-sample/blob/master/sample/iac/Jenkinsfile" target="_blank">點此處開啟</a>
 
 
-#### Python Project style
+這個專案定義的 `Jenkinsfile` 分為四大區塊
 
-<pre>
-└── <span style="color:red;font-weight: bold;">kubernetes/</span>
-    └── deployment.yaml
-    └── service.yaml
-└── <span style="color:blue;">src/</span>
-    └── Hello.py
-└── Dockerfile</span>
-└── <span style="color:red;font-weight: bold;">Jenkinsfile</span>
-└── requirements.txt
-└── <span style="color:red;font-weight: bold;">README.md</span>
-</pre>
+#### `parameters{...}`
 
-基本上 Source Code Repository 中所有的內容都是由 Developer 所提供的，在良好的開發/合作慣例下，一定要在專案根目錄中提供 `README.md` 說明專案的內容資訊等等。
+我們將所有建置過程中，有可能的變數提出成為參數(ex: 版本/憑證)。通常我們會將有權限的內容，例如憑證，定義為參數，讓維運團隊可自行更換內容。
 
-`kubernetes/` 目錄內包含所有 kubernetes 的設定資訊(option)
+#### `stage('init'){...}`
 
+將完整的代碼由 SCM 中取回，後續CI/CD所執行的內容，皆定義在本包代碼中(IaC)。這內容我們已在前一個 Task 進行過 
 
-以上專案架構上的建構，實際如何應用設置，當然可以不同，但仍強烈建議將協作方式明確記載在 `README.md` 檔案中 (或 `CONTRIBUTING.md`)
+#### `stage('ci'){...}`
 
-為專案提供 pipeline 
+此區塊定義了原始碼如何組合成 Docker Image 的過程，我們明確定義出流程，使用 CI 工具協助完成自動化
+
+#### `stage('cd'){...}`
+
+此區塊使用工具 `helm` 佈署 kubernetes 相關的作業，例如 Deployment/Service。此區塊是為輔助維運團隊操作而設計的，但內容仍然是由開發團隊所提供。
+
+---
+
+## 開發團隊 CI 作業
+
+以下動作模擬開發團隊操作情境
+
+1. __返回 Jenkins 首頁__
+如果您不記得 Jenkins 的網址，請至 Google Cloud Shell 中輸入下方指令， `EXTERNAL IP`欄位下的 IP 即為您 Jenkins 的入口
+    ```bash=
+    kubectl get svc 
+    ```
+
+2. __建立新作業__
+    * 請點擊畫面左上角的 ![New Item](https://github.com/abola/devops-hands-on/raw/master/images/devops-new-item.png =150x)
+    * 並於次畫面中，將作業取名為 `IaC-CI` 
+    * 作業類型選 `Pipeline` 
+    * 接著在最下方點擊 `OK`
+
+3. __設定作業內容__ 
+下拉畫面直到Pipeline 區塊
+    * 在 `Definition` 項目中選擇 `Pipeline script from SCM` 
+    * 在 `SCM` 選 `Git`，`Repository URL` 參考以下網址，修改github帳號，成為您自己的帳號名稱
+        ```
+        https://github.com/<YOUR_ACCOUNT>/devops-lab-sample.git
+        ``` 
+    * 指定 `Script Path` 欄位內容為 `sample/iac/Jenkinsfile`
+    * 點擊最下方 `Save` 儲存設定
+
+4. __第一次建置__ 
+在 Jenkinsfile 中，使用 `parameters{...}` 設定的參數，都會自動帶入 Jenkins 中成為設定值，但最少必需執行一次，否則 Jenkins 不會知道遠端 Jenkinsfile 中的內容。
+    * 點擊左側![Build Now](https://github.com/abola/devops-hands-on/raw/master/images/devops-build-now.png =135x)
+    * 第一次建置結果會錯誤是正常的沒關係，請重新整理頁面
+    * 現在您左側建置選項，會變成 `Build with Parameters` 請點擊後進入下一步
+
+5. __`Build with Parameters`__ 
+在此示例中，因為我們定義了五個參數，所以在開始建置前，畫面會出現提示，您可以在此頁面，調整參數的內容
+    * __googleProjectId__ 是您的 GCP 專案名稱，請在 Google Cloud Shell 中輸入以下指令找到您的專案名稱
+        ```bash=
+        gcloud projects list
+        ```
+    * __gcrCredentials__ 是您的 Google Container Registry(GCR) 的憑證資料，CI執行的過程中，會將 docker 打包後的映像檔上傳至此，您可以使用以下指令，取得一個臨時的 token，此token期效僅有不到一個小時，在 Google Cloud Shell 中輸入以下指令，並將結果拷貝貼回此欄位
+        ```bash=
+        gcloud auth print-access-token
+        ```
+    * __buildTag__ 是手動指定映像檔的版號，在本示例中，不論您設定值為何，最終都會為結果打上 `latest` 版號
+    * __backendJavaReplicas__ 與 __backendPhpReplicas__ 是設計給予維運團隊操作使用，在 CI 階段，這兩個設定值不會有效果。
+    * __stage__ 設定執行範圍，目前是模擬開發團隊 CI  作業，請選擇 `CI`。
+    * 點擊最下方 `BUILD` 開始建置
+
+6. __確認完成__
+    * 靜候建置完成，過程大約2分鐘，這段時間您可以點擊畫面中 Pipeline 圖形，即可觀察 LOG 
+    * 建置完成後，為了確認 CI 結果，我們要確認 Google Container Registry(GCR) 中是否有成功上傳，輸入以下指令查看 `backend-java` 服務的映像檔，請將第一行指令中的 `<YOUR_PROJECT_ID>` 更換為您的 GCP 專案名稱
+        ```bash=
+        GOOGLE_PROJECT_ID=<YOUR_PROJECT_ID>
+        gcloud container images list-tags gcr.io/${GOOGLE_PROJECT_ID}/backend-java --project=${GOOGLE_PROJECT_ID}
+        ```
+    * 完成後，您看到的結果應該會類似下方
+        ```
+        DIGEST        TAGS        TIMESTAMP
+        152ac1f875ee  1.0,latest  2019-04-19T11:06:02
+        ```
+
+---
+
+## 維運團隊 CD 作業
+
+我們會另外建立一個作業項目，模擬維運團隊作業操作過程，因為作業的內容都已定義在代碼中，所以除了作業的名稱外，其餘設定都相同
+
+1. __建立新作業__
+    * 請點擊畫面左上角的 ![New Item](https://github.com/abola/devops-hands-on/raw/master/images/devops-new-item.png =150x)
+    * 並於次畫面中，將作業取名為 `IaC-CD` 
+    * 作業類型選擇最下方的 `Copy from` 並在文字輸入框中指定拷貝的來源為 `IaC-CI`
+    * 接著在最下方點擊 `OK`
+2. __設定作業內容__ 
+    * 進入設定畫面後，您會發現所有的設定皆已完成，請下拉至最下方，點擊 `Save` 
+    
+3. __`Build with Parameters`__ 
+與先前不同的是，這次您的畫面直接就看的到選項`Build with Parameters`
+
+    * 點擊左側 `Build with Parameters`
+    * __googleProjectId__ 是您的 GCP 專案名稱，請在 Google Cloud Shell 中輸入以下指令找到您的專案名稱
+        ```bash=
+        gcloud projects list
+        ```
+    * __gcrCredentials__ 與 __buildTag__ 選項在 CD 過程中不會使用，無需修改
+    * __backendJavaReplicas__ 與 __backendPhpReplicas__ 指定後端服務所開啟的 `replica` 數量，開發團隊會給予建議值的設定，目前是 `2`，我們先使用預設值執行建置。
+    * __stage__ 設定執行範圍，目前是模擬維運團隊 CD  作業，<span style="color: red;font-weight:bold;">請選擇 `CD`</span>。
+    * 點擊最下方 `BUILD` 開始建置
+4. __觀察服務狀態__
+在建置完成後， Jenkins 會控制您的 kubernetes cluster，部署示例的服務映像檔
+    * 開啟您的 Google Cloud Shell 輸入以下指令觀察 kubernetes cluster pods 的狀態，請保持開啟不要關閉
+        ```bash=
+        watch -n1 kubectl get pods
+        ```
+    * 在 Jenkins IaC-CD 作業建置完成後，很快的，您應該會在 Google Cloud Shell中看到以下畫面，其中 `backend-java`與`backend-php`都啟動了兩個 PODs
+```
+NAME                              READY     STATUS    RESTARTS   AGE
+backend-java-666bbdd89f-49qh5     1/1       Running   0          14s
+backend-java-666bbdd89f-d2kwp     1/1       Running   0          14s
+backend-php-6786656664-qbqts      1/1       Running   0          14s
+backend-php-6786656664-whkkp      1/1       Running   0          14s
+frontend-python-c5dd559b8-vsj56   1/1       Running   0          14s
+jenkins-794699fc6d-j94bh          1/1       Running   0          1d
+```
+
+5. __調整負載參數__
+最後，我們要模擬維運團隊調整服務負載量的操作
+
+    * 重覆上方步驟 `3. Build with Parameters`的過程，這次我們將 __backendJavaReplicas__ 與 __backendPhpReplicas__ 分別調整為 `3` 與 `1`
+    * 點擊最下方 `BUILD` 開始建置
+    * 接著開啟您的 Google Cloud Shell 觀察 Pods 的狀態，在建置完成後，您會發現服務很快的就轉換完成，`backend-java`增加為三個，而`backend-php`減少為一個
+
+```
+
+NAME                              READY     STATUS    RESTARTS   AGE
+backend-java-666bbdd89f-49qh5     1/1       Running   0          8m
+backend-java-666bbdd89f-6rxns     1/1       Running   0          1m 
+backend-java-666bbdd89f-d2kwp     1/1       Running   0          8m
+backend-php-6786656664-qbqts      1/1       Running   0          8m
+frontend-python-c5dd559b8-vsj56   1/1       Running   0          8m
+jenkins-794699fc6d-j94bh          1/1       Running   0          1d
+```
+
+---
+
+您已完成本階段所有的 Lab ，在這過程中，您學習了如何一步一步的從簡單的使用 Jenkins，到使用 Pipeline as Code，最終實現 Infrastructure as Code 與 DevOps 精神，讓開發與維運團隊流暢的分工協作。
+
+# Clean
+
+當您已經完成 Lab 後，建議您刪除已建立的 Lab 環境，以節省您的費用
+
+輸入以下指令清除 Lab
+
+```bash=
+gcloud projects delete $GOOGLE_PROJECT_ID
+```
