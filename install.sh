@@ -145,6 +145,10 @@ createProject
 createComputeEngine
 connectVM
 
+> ~/.my-env
+echo "GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID" >> ~/.my-env
+echo "GOOGLE_ZONE=$GOOGLE_ZONE" >> ~/.my-env
+
 cat <<EOF > login.sh
 gcloud compute ssh --project=$GOOGLE_PROJECT_ID --zone=$GOOGLE_ZONE systex@$GOOGLE_GCE_NAME
 EOF
