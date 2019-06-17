@@ -143,7 +143,12 @@ data:
                 </org.csanchez.jenkins.plugins.kubernetes.PodEnvVar>
 {{- end }}
               </envVars>
-              <annotations/>
+              <annotations>
+                <org.csanchez.jenkins.plugins.kubernetes.PodAnnotation>
+                  <key>sidecar.istio.io/inject</key>
+                  <value>false</value>
+                </org.csanchez.jenkins.plugins.kubernetes.PodAnnotation>
+              </annotations>
 {{- if .Values.Agent.ImagePullSecret }}
               <imagePullSecrets>
                 <org.csanchez.jenkins.plugins.kubernetes.PodImagePullSecret>
