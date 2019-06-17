@@ -236,7 +236,7 @@ EOF
   |  kubectl apply -f -
   # > /dev/null 2>&1
 
-  while [ `kubectl get po -n istio-system | grep pilot | grep Running | wc -l` -eq 0 ]
+  while [ `kubectl get po -n istio-system | grep istio-sidecar-injector | grep Running | grep '1/1' | wc -l` -eq 0 ]
   do
     sleep 1
   done  
@@ -267,11 +267,9 @@ initParameter
 #createProject
 #createK8S
 installHelm
-installIstio
-
+#installIstio
 installJenkins
-
-installEFK
+#installEFK
 
 > ~/.my-env
 echo "GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID" >> ~/.my-env
