@@ -193,8 +193,7 @@ EOF
   printf "  正在安裝 jenkins:lts ..."
   helm install --name jenkins \
     --set Master.K8sAdminCredential=$K8S_ADMIN_CREDENTIAL \
-    devops-hands-on/jenkins \
-    > /dev/null 2>&1 && echo "完成"
+    devops-hands-on/jenkins # > /dev/null 2>&1 && echo "完成"
 }
 
 installIstio() {
@@ -204,7 +203,7 @@ installIstio() {
 
   printf "  正在下載 Istio:$ISTIO_VERSION ..."
   curl -s -L https://git.io/getLatestIstio | ISTIO_VERSION=$ISTIO_VERSION sh - #> /dev/null 2>&1 && echo "完成"
-  cd $ISTIO_VERSION
+  cd istio-$ISTIO_VERSION
   pwd
   
   printf "  開始安裝 Istio ..."
