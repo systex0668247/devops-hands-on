@@ -37,6 +37,7 @@ spec:
         {{ $key }}: {{ $val | quote }}
         {{- end}}
       annotations:
+        sidecar.istio.io/inject: false
         checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
         {{- if .Values.Master.PodAnnotations }}
 {{ toYaml .Values.Master.PodAnnotations | indent 8 }}
