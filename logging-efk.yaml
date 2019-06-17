@@ -1,0 +1,211 @@
+# Logging Namespace. All below are a part of this namespace.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: logging
+---
+# Elasticsearch Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+  namespace: logging
+  labels:
+    app: elasticsearch
+spec:
+  ports:
+  - port: 9200
+    protocol: TCP
+    targetPort: db
+  selector:
+    app: elasticsearch
+---
+# Elasticsearch Deployment
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: elasticsearch
+  namespace: logging
+  labels:
+    app: elasticsearch
+  annotations:
+    sidecar.istio.io/inject: "false"
+spec:
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+      - image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.1.1
+        name: elasticsearch
+        resources:
+          # need more cpu upon initialization, therefore burstable class
+          limits:
+            cpu: 1000m
+          requests:
+            cpu: 100m
+        env:
+          - name: discovery.type
+            value: single-node
+        ports:
+        - containerPort: 9200
+          name: db
+          protocol: TCP
+        - containerPort: 9300
+          name: transport
+          protocol: TCP
+        volumeMounts:
+        - name: elasticsearch
+          mountPath: /data
+      volumes:
+      - name: elasticsearch
+        emptyDir: {}
+---
+# Fluentd Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: fluentd-es
+  namespace: logging
+  labels:
+    app: fluentd-es
+spec:
+  ports:
+  - name: fluentd-tcp
+    port: 24224
+    protocol: TCP
+    targetPort: 24224
+  - name: fluentd-udp
+    port: 24224
+    protocol: UDP
+    targetPort: 24224
+  selector:
+    app: fluentd-es
+---
+# Fluentd Deployment
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: fluentd-es
+  namespace: logging
+  labels:
+    app: fluentd-es
+  annotations:
+    sidecar.istio.io/inject: "false"
+spec:
+  template:
+    metadata:
+      labels:
+        app: fluentd-es
+    spec:
+      containers:
+      - name: fluentd-es
+        image: gcr.io/google-containers/fluentd-elasticsearch:v2.0.1
+        env:
+        - name: FLUENTD_ARGS
+          value: --no-supervisor -q
+        resources:
+          limits:
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/fluent/config.d
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: config-volume
+        configMap:
+          name: fluentd-es-config
+---
+kind: ConfigMap
+apiVersion: v1
+data:
+  forward.input.conf: |-
+    <source> 
+        type http 
+        port 24224
+        bind 0.0.0.0
+    </source>
+  output.conf: |-
+    <filter **>
+        @type parser
+        format json
+        key_name message
+        reserve_data true
+        inject_key_prefix data.
+        <parse>
+            @type json
+        </parse>
+    </filter>
+    <match **>
+       type elasticsearch
+       log_level info
+       include_tag_key true
+       host elasticsearch
+       port 9200
+       logstash_format true
+       target_index_key target_index
+       include_timestamp true
+       buffer_chunk_limit 2M
+       buffer_queue_limit 8
+       flush_interval 5s
+       max_retry_wait 30
+       disable_retry_limit
+       num_threads 2
+    </match>
+metadata:
+  name: fluentd-es-config
+  namespace: logging
+---
+# Kibana Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana
+  namespace: logging
+  labels:
+    app: kibana
+spec:
+  ports:
+  - port: 5601
+    protocol: TCP
+    targetPort: ui
+  selector:
+    app: kibana
+---
+# Kibana Deployment
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: kibana
+  namespace: logging
+  labels:
+    app: kibana
+  annotations:
+    sidecar.istio.io/inject: "false"
+spec:
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      containers:
+      - name: kibana
+        image: docker.elastic.co/kibana/kibana-oss:6.1.1
+        resources:
+          # need more cpu upon initialization, therefore burstable class
+          limits:
+            cpu: 1000m
+          requests:
+            cpu: 100m
+        env:
+          - name: ELASTICSEARCH_URL
+            value: http://elasticsearch:9200
+        ports:
+        - containerPort: 5601
+          name: ui
+          protocol: TCP
+---
