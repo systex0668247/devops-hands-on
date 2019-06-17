@@ -207,8 +207,8 @@ installIstio() {
   pwd
   
   printf "  開始安裝 Istio ..."
-  kubectl create namespace istio-system > /dev/null 2>&1
-  cat <<EOF | kubectl apply -f - > /dev/null 2>&1
+  kubectl create namespace istio-system > /dev/null 2>&1 && echo 1
+  cat <<EOF | kubectl apply -f - > /dev/null 2>&1 && echo 2
 apiVersion: v1
 kind: Secret
 metadata:
@@ -233,7 +233,8 @@ EOF
     --set servicegraph.enabled=true \
     --set kiali.enabled=true \
     --set kiali.createDemoSecret=true \
-  |  kubectl apply -f -# > /dev/null 2>&1
+  |  kubectl apply -f -
+  # > /dev/null 2>&1
 
   while [ `kubectl get po -n istio-system | grep pilot | grep Running | wc -l` -eq 0 ]
   do
