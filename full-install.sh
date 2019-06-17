@@ -193,7 +193,8 @@ EOF
   printf "  正在安裝 jenkins:lts ..."
   helm install --name jenkins \
     --set Master.K8sAdminCredential=$K8S_ADMIN_CREDENTIAL \
-    devops-hands-on/jenkins # > /dev/null 2>&1 && echo "完成"
+    devops-hands-on/jenkins 
+    # > /dev/null 2>&1 && echo "完成"
 }
 
 installIstio() {
@@ -264,12 +265,12 @@ CURRENT_HOME=$(pwd)
 git clone https://github.com/abola/devops-hands-on.git
 
 initParameter
-#createProject
-#createK8S
+createProject
+createK8S
 installHelm
-#installIstio
 installJenkins
-#installEFK
+installIstio
+installEFK
 
 > ~/.my-env
 echo "GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID" >> ~/.my-env
