@@ -1,7 +1,19 @@
 #!/usr/bin/env bash
 ###########
-# 安裝 K8S+Istio+Jenkins 課程環境
+# 安裝 Lab(k8s) 課程環境
 ###
+
+# 確認使用的是 root user
+checkRootUser() {
+  if [ `whoami | grep ^root$ | wc -l` -eq 0 ];then
+    echo "[ERROR] 請使用 root 執行"
+    echo "        請先執行以下指令，切換為 root 後再重試 "
+    echo "------------------------------------------"
+    echo "sudo su"
+    echo "------------------------------------------"
+    exit
+  fi
+}
 
 # 確認 gcloud 指令已經 login
 checkGcloudLogin() {
@@ -131,6 +143,9 @@ createK8S() {
 }
 
 installHelm() {
+
+  cd $CURRENT_HOME
+
   echo "安裝 Helm ..."
   printf "  正在下載 Helm($HELM_VERSION)..."
   curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get | DESIRED_VERSION=$HELM_VERSION bash > /dev/null 2>&1
@@ -151,10 +166,15 @@ installHelm() {
 }
 
 installJenkins() {
-  kubectl create sa jenkins-deployer
-  kubectl create clusterrolebinding jenkins-deployer-role --clusterrole=cluster-admin --serviceaccount=default:jenkins-deployer
+  cd $CURRENT_HOME
+
+  echo "安裝 Jenkins ..."
+
+  printf "  正在授權 jenkins-deployer..."
+  kubectl create sa jenkins-deployer > /dev/null 2>&1
+  kubectl create clusterrolebinding jenkins-deployer-role --clusterrole=cluster-admin --serviceaccount=default:jenkins-deployer > /dev/null 2>&1
   K8S_ADMIN_CREDENTIAL=$(kubectl describe secret jenkins-deployer | grep token: | awk -F" " '{print $2}')
-  cat <<EOF | kubectl apply -f -
+  cat <<EOF | kubectl apply -f -  > /dev/null 2>&1 && echo "完成"
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
@@ -170,19 +190,25 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 EOF
 
-  git clone https://github.com/bryanwu66/devops-hands-on.git
+  printf "  正在安裝 jenkins:lts ..."
   helm install --name jenkins \
     --set Master.K8sAdminCredential=$K8S_ADMIN_CREDENTIAL \
-    devops-hands-on/jenkins
+    devops-hands-on/jenkins \
+    > /dev/null 2>&1 && echo "完成"
 }
 
 installIstio() {
+  cd $CURRENT_HOME
 
-  curl -s -L https://git.io/getLatestIstio | ISTIO_VERSION=$ISTIO_VERSION sh -
-  cd istio-1.0.8
+  echo "安裝 Istio ..."
 
-  kubectl create namespace istio-system
-  cat <<EOF | kubectl apply -f -
+  printf "  正在下載 Istio:$ISTIO_VERSION ..."
+  curl -s -L https://git.io/getLatestIstio | ISTIO_VERSION=$ISTIO_VERSION sh - > /dev/null 2>&1 && echo "完成"
+  cd $ISTIO_VERSION
+
+  printf "  開始安裝 Istio ..."
+  kubectl create namespace istio-system > /dev/null 2>&1
+  cat <<EOF | kubectl apply -f - > /dev/null 2>&1
 apiVersion: v1
 kind: Secret
 metadata:
@@ -207,13 +233,34 @@ EOF
     --set servicegraph.enabled=true \
     --set kiali.enabled=true \
     --set kiali.createDemoSecret=true \
-  |  kubectl apply -f -
-  kubectl label namespace default istio-injection=enabled
+  |  kubectl apply -f - > /dev/null 2>&1
 
-  kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
-  kubectl apply -f samples/bookinfo/networking/bookinfo-gateway.yaml
-  kubectl apply -f samples/bookinfo/networking/destination-rule-all.yaml
+  while [ `kubectl get po -n istio-system | grep pilot | grep Running | wc -l` -eq 0 ]
+  do
+    sleep 1
+  done  
+  echo "完成"
+
+  printf "  設定自動注入 sidecar ..."
+  kubectl label namespace default istio-injection=enabled > /dev/null 2>&1 && echo "完成"
+
+  printf "  安裝 Bookinfo 範例程式 ..."
+  kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml > /dev/null 2>&1
+  kubectl apply -f samples/bookinfo/networking/bookinfo-gateway.yaml > /dev/null 2>&1
+  kubectl apply -f samples/bookinfo/networking/destination-rule-all.yaml > /dev/null 2>&1 && echo "完成"
 }
+
+installEFK() {
+  cd $CURRENT_HOME
+
+  echo "安裝 Elasticsearch + Fluentd + Kibana ..."
+  printf "  安裝中 ..."
+  kubectl apply -f devops-hands-on/logging-efk.yaml > /dev/null 2>&1 && echo "完成"
+
+}
+
+CURRENT_HOME=$(pwd)
+git clone https://github.com/abola/devops-hands-on.git
 
 initParameter
 createProject
@@ -221,6 +268,7 @@ createK8S
 installHelm
 installJenkins
 installIstio
+installEFK
 
 > ~/.my-env
 echo "GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID" >> ~/.my-env
