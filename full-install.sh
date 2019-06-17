@@ -203,9 +203,10 @@ installIstio() {
   echo "安裝 Istio ..."
 
   printf "  正在下載 Istio:$ISTIO_VERSION ..."
-  curl -s -L https://git.io/getLatestIstio | ISTIO_VERSION=$ISTIO_VERSION sh - > /dev/null 2>&1 && echo "完成"
+  curl -s -L https://git.io/getLatestIstio | ISTIO_VERSION=$ISTIO_VERSION sh - #> /dev/null 2>&1 && echo "完成"
   cd $ISTIO_VERSION
-
+  pwd
+  
   printf "  開始安裝 Istio ..."
   kubectl create namespace istio-system > /dev/null 2>&1
   cat <<EOF | kubectl apply -f - > /dev/null 2>&1
@@ -233,7 +234,7 @@ EOF
     --set servicegraph.enabled=true \
     --set kiali.enabled=true \
     --set kiali.createDemoSecret=true \
-  |  kubectl apply -f - > /dev/null 2>&1
+  |  kubectl apply -f -# > /dev/null 2>&1
 
   while [ `kubectl get po -n istio-system | grep pilot | grep Running | wc -l` -eq 0 ]
   do
@@ -263,8 +264,8 @@ CURRENT_HOME=$(pwd)
 git clone https://github.com/abola/devops-hands-on.git
 
 initParameter
-createProject
-createK8S
+#createProject
+#createK8S
 installHelm
 installJenkins
 installIstio
