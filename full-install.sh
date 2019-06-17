@@ -266,8 +266,8 @@ initParameter
 #createProject
 #createK8S
 installHelm
-installJenkins
 installIstio
+installJenkins
 installEFK
 
 > ~/.my-env
