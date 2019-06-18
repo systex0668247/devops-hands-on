@@ -194,8 +194,7 @@ EOF
   helm install --name jenkins \
     --set Master.ServiceType=ClusterIP \
     --set Master.K8sAdminCredential=$K8S_ADMIN_CREDENTIAL \
-    devops-hands-on/jenkins 
-    # > /dev/null 2>&1 && echo "完成"
+    devops-hands-on/jenkins > /dev/null 2>&1 && echo "完成"
 }
 
 installIstio() {
@@ -204,13 +203,12 @@ installIstio() {
   echo "安裝 Istio ..."
 
   printf "  正在下載 Istio:$ISTIO_VERSION ..."
-  curl -s -L https://git.io/getLatestIstio | ISTIO_VERSION=$ISTIO_VERSION sh - #> /dev/null 2>&1 && echo "完成"
+  curl -s -L https://git.io/getLatestIstio | ISTIO_VERSION=$ISTIO_VERSION sh - > /dev/null 2>&1 && echo "完成"
   cd istio-$ISTIO_VERSION
-  pwd
   
   printf "  開始安裝 Istio ..."
-  kubectl create namespace istio-system > /dev/null 2>&1 && echo 1
-  cat <<EOF | kubectl apply -f - > /dev/null 2>&1 && echo 2
+  kubectl create namespace istio-system > /dev/null 2>&1 
+  cat <<EOF | kubectl apply -f - > /dev/null 2>&1 
 apiVersion: v1
 kind: Secret
 metadata:
@@ -235,9 +233,8 @@ EOF
     --set servicegraph.enabled=true \
     --set kiali.enabled=true \
     --set kiali.createDemoSecret=true \
-  |  kubectl apply -f -
-  # > /dev/null 2>&1
-
+  |  kubectl apply -f - > /dev/null 2>&1
+  printf "等待服務啟動中..."
   while [ `kubectl get po -n istio-system | grep istio-sidecar-injector | grep Running | grep '1/1' | wc -l` -eq 0 ]
   do
     sleep 1
@@ -268,8 +265,8 @@ installKSM() {
   echo "安裝 Kube-state-metrics ..."
   printf "  安裝中 ..."
   kubectl apply -f devops-hands-on/kube-state-metrics/app-crd.yaml > /dev/null 2>&1 
-  kubectl apply -f devops-hands-on/kube-state-metrics/prometheus-metrics_sa_manifest.yaml > /dev/null 2>&1 
-  kubectl apply -f devops-hands-on/kube-state-metrics/prometheus-metrics_manifest.yaml > /dev/null 2>&1 && echo "完成"
+  kubectl apply -f devops-hands-on/kube-state-metrics/prometheus-metrics_sa_manifest.yaml --namespace logging > /dev/null 2>&1 
+  kubectl apply -f devops-hands-on/kube-state-metrics/prometheus-metrics_manifest.yaml --namespace logging  > /dev/null 2>&1 && echo "完成"
 
 }
 
