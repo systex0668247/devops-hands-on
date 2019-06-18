@@ -269,8 +269,8 @@ createProject
 createK8S
 installHelm
 installJenkins
-#installIstio
-#installEFK
+installIstio
+installEFK
 
 > ~/.my-env
 echo "GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID" >> ~/.my-env
