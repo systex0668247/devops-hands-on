@@ -112,4 +112,23 @@ spec:
         host: {{ .Values.istio.kibana.svc }}
         port:
           number: {{ .Values.istio.kibana.port }}
-
+---
+# Jenkins CI/CD
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Values.jenkins.name }}
+spec:
+  hosts:
+  - "{{ .Values.jenkins.name }}.{{ .Values.istio.ingressgateway.ip }}.nip.io"
+  gateways:
+  - {{ .Values.gateway.name }}
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: {{ .Values.jenkins.svc }}
+        port:
+          number: {{ .Values.jenkins.port }}
