@@ -192,6 +192,7 @@ EOF
 
   printf "  正在安裝 jenkins:lts ..."
   helm install --name jenkins \
+    --set Master.ServiceType=ClusterIP \
     --set Master.K8sAdminCredential=$K8S_ADMIN_CREDENTIAL \
     devops-hands-on/jenkins 
     # > /dev/null 2>&1 && echo "完成"
@@ -261,6 +262,81 @@ installEFK() {
 
 }
 
+installKSM() {
+  cd $CURRENT_HOME
+
+  echo "安裝 Kube-state-metrics ..."
+  printf "  安裝中 ..."
+  kubectl apply -f devops-hands-on/kube-state-metrics/app-crd.yaml > /dev/null 2>&1 
+  kubectl apply -f devops-hands-on/kube-state-metrics/prometheus-metrics_sa_manifest.yaml > /dev/null 2>&1 
+  kubectl apply -f devops-hands-on/kube-state-metrics/prometheus-metrics_manifest.yaml > /dev/null 2>&1 && echo "完成"
+
+}
+
+confirmInstall() {
+  cd $CURRENT_HOME
+  
+  echo "確認安裝項目清單"
+  
+  printf "  GCP Project($GOOGLE_PROJECT_ID) ............."
+  if [ $(gcloud projects list | grep $GOOGLE_PROJECT_ID | wc -l ) -eq 1 ]; then
+    echo "完成."
+  else 
+    echo "失敗."
+  fi
+  printf "  GCP Kubernetes Cluster($GOOGLE_GKE_NAME) ........"
+  if [ $(gcloud container clusters list | grep $GOOGLE_GKE_NAME | wc -l ) -eq 1 ]; then
+    echo "完成."
+  else 
+    echo "失敗."
+  fi
+
+  printf "  Istio System ..............................."
+  if [ $(kubectl get po -n istio-system | grep -E "servicegraph|prometheus|kiali|tracing|telemetry|sidecar|policy|egressgateway|galley|ingressgateway|pilot" | wc -l ) -ge 11 ]; then
+    echo "已安裝."
+  else 
+    echo "失敗."
+  fi
+
+  printf "  Elasticsearch+Kibana+Fluentd ..............."
+  if [ $(kubectl get po -n logging | grep -E "elasticsearch|kibana|fluentd" | wc -l ) -eq 3 ]; then
+    echo "已安裝."
+  else 
+    echo "失敗."
+  fi
+
+  printf "  Kube state metrics ........................."
+  if [ $(kubectl get po -n logging | grep "prometheus-metrics" | wc -l ) -ge 5 ]; then
+    echo "已安裝."
+  else 
+    echo "失敗."
+  fi
+
+  printf "  Jenkins ...................................."
+  if [ $(helm list | grep jenkins | wc -l ) -eq 1 ]; then
+    echo "已安裝."
+  else 
+    echo "失敗."
+  fi  
+}
+
+setupService() {
+  cd $CURRENT_HOME
+  
+  echo "設定對外服務項目..."
+  
+  printf "  等待對外IP配發中..."
+  while [ `kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}' | wc -c` -eq 0 ]
+  do
+    sleep 1
+  done  
+  INGRESS_HOST=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  echo "(IP=$INGRESS_HOST)...完成"
+
+  printf "  開啟對外服務中..."
+  helm template --set istio.ingressgateway.ip=$INGRESS_HOST devops-hands-on/svc | kubectl apply -f - > /dev/null 2>&1 && echo "完成"
+}
+
 CURRENT_HOME=$(pwd)
 git clone https://github.com/abola/devops-hands-on.git
 
@@ -271,24 +347,25 @@ installHelm
 installJenkins
 installIstio
 installEFK
+installKSM
+setupService
+confirmInstall
 
 > ~/.my-env
 echo "GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID" >> ~/.my-env
 echo "GOOGLE_ZONE=$GOOGLE_ZONE" >> ~/.my-env
 echo "GOOGLE_GKE_NAME=$GOOGLE_GKE_NAME" >> ~/.my-env
+echo "INGRESS_HOST=$INGRESS_HOST" >> ~/.my-env
 
-
-#cat <<EOF
-#----------------------------------------
-#環境安裝完成
-#----------
-#GCP 專案名稱: $GOOGLE_PROJECT_ID
-#GKE 叢集名稱: $GOOGLE_GKE_NAME
-#GKE 地區    : $GOOGLE_ZONE
-#GKE 版本    : $GOOGLE_GKE_VERSION
-#----------------------------------------
-#請執行以下指令，完成環境設置
-#-----------------------
-#export \$(cat .my-env|xargs)
-#----------------------------------------
-#EOF
+cat <<EOF
+-------------------------------------------------------------
+環境安裝完成
+----------
+Istio Bookinfo 示範程式: http://bookinfo.$INGRESS_HOST.nip.io/
+K8S Health Monitoring  : http://grafana.$INGRESS_HOST.nip.io/
+Kiali Service Graph    : http://kiali.$INGRESS_HOST.nip.io/
+Jaeger Tracing         : http://jaeger.$INGRESS_HOST.nip.io/
+Kibana Logging         : http://kibana.$INGRESS_HOST.nip.io/
+Jenkins CI/CD          : http://jenkins.$INGRESS_HOST.nip.io/
+-------------------------------------------------------------
+EOF
