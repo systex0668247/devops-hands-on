@@ -28,4 +28,9 @@ istio:
   kibana:
     name: kibana
     svc: kibana.logging.svc.cluster.local
-    port: 5601    
+    port: 5601
+# Jenkins CI/CD
+jenkins:
+  name: jenkins
+  svc: jenkins.default.svc.cluster.local
+  port: 80
