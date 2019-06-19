@@ -170,7 +170,15 @@ installJenkins() {
 
   echo "安裝 Jenkins ..."
 
-  printf "  正在授權 jenkins-deployer..."
+  printf "  正在授權 jenkins-deployer..."  
+  
+  # Google Container Registry 
+  gcloud iam service-accounts create jenkins-deployer
+  gsutil iam ch serviceAccount:jenkins-deployer@${GOOGLE_PROJECT_ID}.iam
+.gserviceaccount.com:admin gs://artifacts.${GOOGLE_PROJECT_ID}.appspot.com/
+  docker login -u _json_key -p "$(cat key.json)" https://gcr.io
+  kubectl create configmap google-container-key --from-file=.docker/key.json
+  
   kubectl create sa jenkins-deployer > /dev/null 2>&1
   kubectl create clusterrolebinding jenkins-deployer-role --clusterrole=cluster-admin --serviceaccount=default:jenkins-deployer > /dev/null 2>&1
   K8S_ADMIN_CREDENTIAL=$(kubectl describe secret jenkins-deployer | grep token: | awk -F" " '{print $2}')
