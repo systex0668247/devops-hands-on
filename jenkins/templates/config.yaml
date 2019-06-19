@@ -70,6 +70,11 @@ data:
                   <mountPath>/var/lib/docker</mountPath>
                   <memory>false</memory>
                 </org.csanchez.jenkins.plugins.kubernetes.volumes.EmptyDirVolume>
+                <org.csanchez.jenkins.plugins.kubernetes.volumes.PersistentVolumeClaim>
+                  <mountPath>/root</mountPath>
+                  <claimName>jenkins-slave-root-home</claimName>
+                  <readOnly>false</readOnly>
+                </org.csanchez.jenkins.plugins.kubernetes.volumes.PersistentVolumeClaim>                
               </volumes>
               <containers>
                 <org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
