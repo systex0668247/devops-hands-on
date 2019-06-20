@@ -177,7 +177,7 @@ installJenkins() {
   gsutil iam ch serviceAccount:jenkins-deployer@${GOOGLE_PROJECT_ID}.iam.gserviceaccount.com:admin gs://artifacts.${GOOGLE_PROJECT_ID}.appspot.com/  > /dev/null 2>&1
   gcloud iam service-accounts keys create key.json --iam-account=jenkins-deployer@${GOOGLE_PROJECT_ID}.iam.gserviceaccount.com > /dev/null 2>&1
   docker login -u _json_key -p "$(cat key.json)" https://gcr.io  > /dev/null 2>&1
-  kubectl create configmap google-container-key --from-file=.docker/key.json  > /dev/null 2>&1
+  kubectl create configmap google-container-key --from-file=.docker/config.json  > /dev/null 2>&1
 
   kubectl create sa jenkins-deployer > /dev/null 2>&1
   kubectl create clusterrolebinding jenkins-deployer-role --clusterrole=cluster-admin --serviceaccount=default:jenkins-deployer > /dev/null 2>&1
