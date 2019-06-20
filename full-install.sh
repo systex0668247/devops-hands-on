@@ -170,15 +170,14 @@ installJenkins() {
 
   echo "安裝 Jenkins ..."
 
-  printf "  正在授權 jenkins-deployer..."  
-  
+  printf "  正在授權 jenkins-deployer..."
+
   # Google Container Registry 
-  gcloud iam service-accounts create jenkins-deployer
-  gsutil iam ch serviceAccount:jenkins-deployer@${GOOGLE_PROJECT_ID}.iam
-.gserviceaccount.com:admin gs://artifacts.${GOOGLE_PROJECT_ID}.appspot.com/
-  docker login -u _json_key -p "$(cat key.json)" https://gcr.io
-  kubectl create configmap google-container-key --from-file=.docker/key.json
-  
+  gcloud iam service-accounts create jenkins-deployer > /dev/null 2>&1
+  gsutil iam ch serviceAccount:jenkins-deployer@${GOOGLE_PROJECT_ID}.iam.gserviceaccount.com:admin gs://artifacts.${GOOGLE_PROJECT_ID}.appspot.com/  > /dev/null 2>&1
+  docker login -u _json_key -p "$(cat key.json)" https://gcr.io  > /dev/null 2>&1
+  kubectl create configmap google-container-key --from-file=.docker/key.json  > /dev/null 2>&1
+
   kubectl create sa jenkins-deployer > /dev/null 2>&1
   kubectl create clusterrolebinding jenkins-deployer-role --clusterrole=cluster-admin --serviceaccount=default:jenkins-deployer > /dev/null 2>&1
   K8S_ADMIN_CREDENTIAL=$(kubectl describe secret jenkins-deployer | grep token: | awk -F" " '{print $2}')
@@ -198,10 +197,17 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 EOF
 
+  printf "  正在安裝 jenkins-slave ... "
+  printf "build..." && docker build -t gcr.io/${GOOGLE_PROJECT_ID}/jnlp-slave:v1 devops-hands-on/jenkins/slave > /dev/null 2>&1
+  printf "push..." && docker push gcr.io/${GOOGLE_PROJECT_ID}/jnlp-slave:v1 > /dev/null 2>&1
+  echo "完成"
+
   printf "  正在安裝 jenkins:lts ..."
   helm install --name jenkins \
     --set Master.ServiceType=ClusterIP \
     --set Master.K8sAdminCredential=$K8S_ADMIN_CREDENTIAL \
+    --set Agent.Image=gcr.io/${GOOGLE_PROJECT_ID}/jnlp-slave \
+    --set Agent.ImageTag=v1 \
     devops-hands-on/jenkins > /dev/null 2>&1 && echo "完成"
 }
 
