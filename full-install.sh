@@ -350,6 +350,10 @@ setupService() {
 }
 
 CURRENT_HOME=$(pwd)
+
+rm -rf ~/.my-env
+rm -rf devops-hands-on
+
 git clone https://github.com/abola/devops-hands-on.git
 
 initParameter
