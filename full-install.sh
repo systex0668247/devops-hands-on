@@ -209,7 +209,7 @@ EOF
     --set Master.K8sAdminCredential=$K8S_ADMIN_CREDENTIAL \
     --set Agent.Image=gcr.io/${GOOGLE_PROJECT_ID}/jnlp-slave \
     --set Agent.ImageTag=v1 \
-    --set Master.AdminPassword=c3lzdGV4 \
+    --set Master.AdminPassword=systex \
     devops-hands-on/jenkins > /dev/null 2>&1 && echo "完成"
 }
 
