@@ -208,6 +208,7 @@ EOF
     --set Master.K8sAdminCredential=$K8S_ADMIN_CREDENTIAL \
     --set Agent.Image=gcr.io/${GOOGLE_PROJECT_ID}/jnlp-slave \
     --set Agent.ImageTag=v1 \
+    --set Master.AdminPassword=c3lzdGV4 \
     devops-hands-on/jenkins > /dev/null 2>&1 && echo "完成"
 }
 
@@ -233,7 +234,7 @@ metadata:
 type: Opaque
 data:
   username: YWRtaW4=
-  passphrase: YWRtaW4=
+  passphrase: c3lzdGV4
 EOF
   #helm template install/kubernetes/helm/istio-init --name istio-init --namespace istio-system | kubectl apply -f -
   helm template install/kubernetes/helm/istio \
