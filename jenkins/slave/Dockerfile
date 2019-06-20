@@ -18,7 +18,8 @@ RUN apk add curl wget \
     # Cleanup
     && rm -rf /var/cache/apk/* \
     && rm -rf /tmp/*
-    ORKDIR /opt
+    
+WORKDIR /opt
 
 # Add docker client
 ENV DOCKER_VERSION 18.03.1-ce
