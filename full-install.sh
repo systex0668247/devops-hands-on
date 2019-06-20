@@ -174,7 +174,10 @@ installJenkins() {
 
   # Google Container Registry 
   gcloud iam service-accounts create jenkins-deployer > /dev/null 2>&1
-  gsutil iam ch serviceAccount:jenkins-deployer@${GOOGLE_PROJECT_ID}.iam.gserviceaccount.com:admin gs://artifacts.${GOOGLE_PROJECT_ID}.appspot.com/  > /dev/null 2>&1
+  #gsutil iam ch serviceAccount:jenkins-deployer@${GOOGLE_PROJECT_ID}.iam.gserviceaccount.com:admin gs://artifacts.${GOOGLE_PROJECT_ID}.appspot.com/  > /dev/null 2>&1
+  gcloud projects add-iam-policy-binding ${GOOGLE_PROJECT_ID} \
+      --member="serviceAccount:jenkins-deployer@${GOOGLE_PROJECT_ID}.iam.gserviceaccount.com" \
+      --role='roles/storage.admin' > /dev/null 2>&1
   gcloud iam service-accounts keys create key.json --iam-account=jenkins-deployer@${GOOGLE_PROJECT_ID}.iam.gserviceaccount.com > /dev/null 2>&1
   docker login -u _json_key -p "$(cat key.json)" https://gcr.io  > /dev/null 2>&1
   kubectl create configmap google-container-key --from-file=.docker/config.json  > /dev/null 2>&1
@@ -353,6 +356,7 @@ setupService() {
 CURRENT_HOME=$(pwd)
 
 rm -rf ~/.my-env
+rm -rf key.json
 rm -rf devops-hands-on
 
 git clone https://github.com/abola/devops-hands-on.git
