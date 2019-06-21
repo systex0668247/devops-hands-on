@@ -156,6 +156,10 @@ spec:
             - name: K8S_ADMIN_CREDENTIAL
               value: {{ .Values.Master.K8sAdminCredential }}
             {{- end }}
+            {{- if .Values.Master.GoogleProjectId }}
+            - name: GOOGLE_PROJECT_ID
+              value: {{ .Values.Master.GoogleProjectId }}
+            {{- end }}
             {{- if .Values.Master.UseSecurity }}
             - name: ADMIN_PASSWORD
               valueFrom:
