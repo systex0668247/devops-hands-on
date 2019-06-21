@@ -213,6 +213,7 @@ EOF
     --set Agent.Image=gcr.io/${GOOGLE_PROJECT_ID}/jnlp-slave \
     --set Agent.ImageTag=v1 \
     --set Master.AdminPassword=systex \
+    --set Master.GoogleProjectId=${GOOGLE_PROJECT_ID} \
     devops-hands-on/jenkins > /dev/null 2>&1 && echo "完成"
 }
 
