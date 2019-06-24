@@ -70,10 +70,10 @@ initParameter() {
   fi
 
   # GOOGLE_GCE_IMAGE
-  if [ -z $GOOGLE_GKE_VERSION  ]; then
-    GOOGLE_GKE_VERSION=1.12.8-gke.6
-    echo "  未定義 GOOGLE_GKE_VERSION.  使用預設值.......(GOOGLE_GKE_VERSION=$GOOGLE_GKE_VERSION)"
-  fi
+  #if [ -z $GOOGLE_GKE_VERSION  ]; then
+  #  GOOGLE_GKE_VERSION=1.12.8-gke.6
+  #  echo "  未定義 GOOGLE_GKE_VERSION.  使用預設值.......(GOOGLE_GKE_VERSION=$GOOGLE_GKE_VERSION)"
+  #fi
 
   # HELM_VERSION
   if [ -z $HELM_VERSION  ]; then
@@ -126,7 +126,6 @@ createK8S() {
         --machine-type=$GOOGLE_GKE_MACHINE \
         --zone=$GOOGLE_ZONE \
         --num-nodes=$GOOGLE_GKE_NODES \
-        --cluster-version=$GOOGLE_GKE_VERSION \
         --disk-type "pd-standard" \
         --disk-size "500" \
         > /dev/null 2>&1 && echo "完成"
