@@ -1,0 +1,81 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: hello-world-company
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - bookinfo-gateway
+  http:
+  - match:
+    - uri:
+        exact: /hello
+    - uri:
+        exact: /long        
+    route:
+    - destination:
+        host: hello-world-company.kube-public.svc.cluster.local
+        port:
+          number: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-world-company
+  namespace: kube-public
+  labels:
+    app: hello-world-company
+spec:
+  ports:
+  - port: 8080
+    name: http
+  selector:
+    app: hello-world-company
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-world-company
+  namespace: kube-public
+  labels:
+    app: hello-world-company
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello-world-company
+      tier: web
+  template:
+    metadata:
+      labels:
+        app: hello-world-company
+        tier: web
+    spec:
+      containers:
+      - name: hello-world
+        image: gcr.io/a506-till/hello-company:with-gs-v1
+        ports:
+        - containerPort: 8080
+        lifecycle:
+          preStop:
+            exec:
+              command: ["sleep", "5"]
+        readinessProbe:
+          httpGet:
+            path: /hello
+            port: 8080
+          initialDelaySeconds: 3  #容器啟動後第一次執行探測是需要等待多少秒。
+          periodSeconds: 3        #執行探測的頻率。默認是10秒，最小1秒。
+          timeoutSeconds: 1       #探測超時時間。默認1秒，最小1秒。       
+          successThreshold: 1     #探測失敗後，最少連續探測成功多少次才被認定為成功。默認是 1。對於 liveness 必須是 1。最小值是 1。
+          failureThreshold: 3     #探測成功後，最少連續探測失敗多少次才被認定為失敗。默認是 3。最小值是 1。
+        livenessProbe:
+          httpGet:
+            path: /hello
+            port: 8080
+          initialDelaySeconds: 30 #容器啟動後第一次執行探測是需要等待多少秒。
+          periodSeconds: 10       #執行探測的頻率。默認是10秒，最小1秒。
+          timeoutSeconds: 1       #探測超時時間。默認1秒，最小1秒。       
+          successThreshold: 1     #探測失敗後，最少連續探測成功多少次才被認定為成功。默認是 1。對於 liveness 必須是 1。最小值是 1。
+          failureThreshold: 10    #探測成功後，最少連續探測失敗多少次才被認定為失敗。默認是 3。最小值是 1。        
