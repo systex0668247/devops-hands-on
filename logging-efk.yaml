@@ -140,6 +140,16 @@ data:
             @type json
         </parse>
     </filter>
+    <filter **>
+        @type parser
+        format json
+        key_name _tracing
+        reserve_data true
+        inject_key_prefix tracing.
+        <parse>
+            @type json
+        </parse>
+    </filter>
     <match **>
        type elasticsearch
        log_level info
