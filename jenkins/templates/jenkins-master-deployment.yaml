@@ -37,6 +37,7 @@ spec:
         {{ $key }}: {{ $val | quote }}
         {{- end}}
       annotations:
+        sidecar.istio.io/inject: "false"
         checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
         {{- if .Values.Master.PodAnnotations }}
 {{ toYaml .Values.Master.PodAnnotations | indent 8 }}
@@ -154,6 +155,10 @@ spec:
             {{- if .Values.Master.K8sAdminCredential }}
             - name: K8S_ADMIN_CREDENTIAL
               value: {{ .Values.Master.K8sAdminCredential }}
+            {{- end }}
+            {{- if .Values.Master.GoogleProjectId }}
+            - name: GOOGLE_PROJECT_ID
+              value: {{ .Values.Master.GoogleProjectId }}
             {{- end }}
             {{- if .Values.Master.UseSecurity }}
             - name: ADMIN_PASSWORD

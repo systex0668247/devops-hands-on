@@ -1,0 +1,36 @@
+gateway:
+  name: devops-camp-gateway
+istio:
+  namespace: istio-system
+  ingressgateway:
+    ip: 
+  # Bookinfo
+  bookinfo:
+    name: bookinfo
+    svc: productpage.default.svc.cluster.local
+    port: 9080
+  # Jaeger UI
+  jaeger:
+    name: jaeger
+    svc: jaeger-query.istio-system.svc.cluster.local
+    port: 16686
+  # Kiali UI
+  kiali:
+    name: kiali
+    svc: kiali.istio-system.svc.cluster.local
+    port: 20001
+  # Grafana
+  grafana:
+    name: grafana
+    svc: prometheus-metrics-grafana.logging.svc.cluster.local
+    port: 3000
+  # Kibana
+  kibana:
+    name: kibana
+    svc: kibana.logging.svc.cluster.local
+    port: 5601
+# Jenkins CI/CD
+jenkins:
+  name: jenkins
+  svc: jenkins.default.svc.cluster.local
+  port: 80

@@ -70,6 +70,15 @@ data:
                   <mountPath>/var/lib/docker</mountPath>
                   <memory>false</memory>
                 </org.csanchez.jenkins.plugins.kubernetes.volumes.EmptyDirVolume>
+                <org.csanchez.jenkins.plugins.kubernetes.volumes.PersistentVolumeClaim>
+                  <mountPath>/root</mountPath>
+                  <claimName>jenkins-slave-root-home</claimName>
+                  <readOnly>false</readOnly>
+                </org.csanchez.jenkins.plugins.kubernetes.volumes.PersistentVolumeClaim>
+                <org.csanchez.jenkins.plugins.kubernetes.volumes.ConfigMapVolume>
+                  <mountPath>/home/jenkins/.docker</mountPath>
+                  <configMapName>google-container-key</configMapName>
+                </org.csanchez.jenkins.plugins.kubernetes.volumes.ConfigMapVolume>
               </volumes>
               <containers>
                 <org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
@@ -143,7 +152,12 @@ data:
                 </org.csanchez.jenkins.plugins.kubernetes.PodEnvVar>
 {{- end }}
               </envVars>
-              <annotations/>
+              <annotations>
+                <org.csanchez.jenkins.plugins.kubernetes.PodAnnotation>
+                  <key>sidecar.istio.io/inject</key>
+                  <value>false</value>
+                </org.csanchez.jenkins.plugins.kubernetes.PodAnnotation>
+              </annotations>
 {{- if .Values.Agent.ImagePullSecret }}
               <imagePullSecrets>
                 <org.csanchez.jenkins.plugins.kubernetes.PodImagePullSecret>
@@ -202,7 +216,21 @@ data:
       </crumbIssuer>
 {{- end }}
       <nodeProperties/>
-      <globalNodeProperties/>
+      <globalNodeProperties>
+        <hudson.slaves.EnvironmentVariablesNodeProperty>
+          <envVars serialization="custom">
+            <unserializable-parents/>
+            <tree-map>
+              <default>
+                <comparator class="hudson.util.CaseInsensitiveComparator"/>
+              </default>
+              <int>1</int>
+              <string>GOOGLE_PROJECT_ID</string>
+              <string>{{ .Values.Master.GoogleProjectId }}</string>
+            </tree-map>
+          </envVars>
+        </hudson.slaves.EnvironmentVariablesNodeProperty>
+      </globalNodeProperties>
       <noUsageStatistics>true</noUsageStatistics>
     </hudson>
 {{- if .Values.Master.ScriptApproval }}

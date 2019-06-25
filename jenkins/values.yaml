@@ -145,7 +145,8 @@ Master:
     - credentials-binding:1.19
     - git:3.10.0
     - kubernetes-cli:1.6.0
-
+    - gitlab-plugin:1.5.12
+    - slack:2.26
   # Enable to always override the installed plugins with the values of 'Master.InstallPlugins' on upgrade or redeployment.
   # OverwritePlugins: true
   # Enable HTML parsing using OWASP Markup Formatter Plugin (antisamy-markup-formatter), useful with ghprb plugin.
