@@ -1,0 +1,21 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: telemetry-backend-delay
+spec:
+  hosts:
+  - telemetry-backend
+  http:
+  - fault:
+      delay:
+        fixedDelay: 0.2s
+        percent: 100
+    match:
+    - uri:
+        prefix: /get/inStock
+    route:
+    - destination:
+        host: telemetry-backend
+  - route:
+    - destination:
+        host: telemetry-backend
