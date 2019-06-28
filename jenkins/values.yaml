@@ -127,7 +127,8 @@ Master:
   # LoadBalancerIP: 1.2.3.4
   # Optionally configure a JMX port
   # requires additional JavaOpts, ie
-  # JavaOpts: >
+  JavaOpts: >
+    -Dorg.apache.commons.jelly.tags.fmt.timeZone=Asia/Taipei
   #   -Dcom.sun.management.jmxremote.port=4000
   #   -Dcom.sun.management.jmxremote.authenticate=false
   #   -Dcom.sun.management.jmxremote.ssl=false
