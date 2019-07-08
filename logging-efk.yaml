@@ -1,8 +1,29 @@
-# Logging Namespace. All below are a part of this namespace.
+# efk Namespace. All below are a part of this namespace.
 apiVersion: v1
 kind: Namespace
 metadata:
   name: logging
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: faster
+provisioner: kubernetes.io/gce-pd
+parameters:
+  type: pd-ssd
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: elasticsearch-data-pvc
+  namespace: logging
+spec:
+  storageClassName: faster
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
 ---
 # Elasticsearch Service
 apiVersion: v1
@@ -37,12 +58,14 @@ spec:
         app: elasticsearch
     spec:
       containers:
-      - image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.1.1
+      #- image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.1
+      #- image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.1.1
+      - image: amazon/opendistro-for-elasticsearch:1.0.0
         name: elasticsearch
         resources:
           # need more cpu upon initialization, therefore burstable class
           limits:
-            cpu: 1000m
+            cpu: 2000m
           requests:
             cpu: 100m
         env:
@@ -56,11 +79,13 @@ spec:
           name: transport
           protocol: TCP
         volumeMounts:
-        - name: elasticsearch
-          mountPath: /data
+        - name: elasticsearch-data
+          mountPath: /usr/share/elasticsearch/data
+          #mountPath: /data
       volumes:
-      - name: elasticsearch
-        emptyDir: {}
+      - name: elasticsearch-data
+        persistentVolumeClaim:
+          claimName: elasticsearch-data-pvc
 ---
 # Fluentd Service
 apiVersion: v1
@@ -72,6 +97,14 @@ metadata:
     app: fluentd-es
 spec:
   ports:
+  - name: fluentd-tcp
+    port: 8888
+    protocol: TCP
+    targetPort: 8888
+  - name: fluentd-udp
+    port: 8888
+    protocol: UDP
+    targetPort: 8888
   - name: fluentd-tcp
     port: 24224
     protocol: TCP
@@ -124,6 +157,10 @@ kind: ConfigMap
 apiVersion: v1
 data:
   forward.input.conf: |-
+    <source>
+      type forward
+      port 8888
+    </source>
     <source> 
         type http 
         port 24224
@@ -149,13 +186,19 @@ data:
         <parse>
             @type json
         </parse>
-    </filter>
+    </filter>    
     <match **>
+      @type copy
+      <store>
        type elasticsearch
        log_level info
        include_tag_key true
-       host elasticsearch
+       host elasticsearch.logging
        port 9200
+       scheme https
+       ssl_verify false
+       user admin
+       password admin
        logstash_format true
        target_index_key target_index
        include_timestamp true
@@ -165,6 +208,7 @@ data:
        max_retry_wait 30
        disable_retry_limit
        num_threads 2
+      </store>
     </match>
 metadata:
   name: fluentd-es-config
@@ -204,7 +248,8 @@ spec:
     spec:
       containers:
       - name: kibana
-        image: docker.elastic.co/kibana/kibana-oss:6.1.1
+        #image: docker.elastic.co/kibana/kibana-oss:6.8.1
+        image: amazon/opendistro-for-elasticsearch-kibana:1.0.0
         resources:
           # need more cpu upon initialization, therefore burstable class
           limits:
@@ -213,9 +258,10 @@ spec:
             cpu: 100m
         env:
           - name: ELASTICSEARCH_URL
-            value: http://elasticsearch:9200
+            value: https://elasticsearch:9200
+          - name: ELASTICSEARCH_HOSTS
+            value: https://elasticsearch:9200
         ports:
         - containerPort: 5601
           name: ui
           protocol: TCP
----
