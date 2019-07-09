@@ -27,6 +27,7 @@ git clone https://github.com/harryliu123/eks-templates
 cd eks-templates
 
 # 建立VPC
+export VPC_STACK_NAME=eks-service
 aws cloudformation create-stack  --stack-name ${VPC_STACK_NAME} --template-body file://eks-vpc.yaml --region us-east-2
 sleep 5
 vpcid=$(aws ec2 describe-vpcs --filters Name=tag:Name,Values=${VPC_STACK_NAME}-VPC |jq -r  '.Vpcs[].VpcId')
