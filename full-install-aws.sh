@@ -54,8 +54,8 @@ done
 
 # 新建ECR
 createecr() {
-aws ecr create-repository --repository-name ecr
-$(aws ecr get-login --no-include-email --region us-west-2)
+aws ecr create-repository --repository-name ecr --region $AWS_REGION
+$(aws ecr get-login --no-include-email --region $AWS_REGION)
 echo "ecr的 token 在 $CURRENT_HOME/.docker/config.json"
 }
 
