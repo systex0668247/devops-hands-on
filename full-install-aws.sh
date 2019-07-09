@@ -7,9 +7,8 @@
 ###########
 # 專案 AWS 建立
 ###
-AWS_REGION=
-AWS_ACCOUT_ID=
-
+AWS_REGION=us-west-2
+AWS_ACCOUT_ID=348053640110
 
 
 initialclient(){
@@ -42,7 +41,7 @@ Subnet03=$(aws ec2 describe-subnets --filters Name=tag:Name,Values=${VPC_STACK_N
 iamrole=$(aws iam get-role --role-name AmazonEKSAdminRole --query 'Role.Arn' --output text)
 
 # 部屬 EKS
-EKS_ADMIN_ROLE=$iamrole VPC_ID=$vpcid SUBNET1=$Subnet01 SUBNET2=$Subnet02 SUBNET3=$Subnet03  make create-eks-cluster
+REGION=$AWS_REGION EKS_ADMIN_ROLE=$iamrole VPC_ID=$vpcid SUBNET1=$Subnet01 SUBNET2=$Subnet02 SUBNET3=$Subnet03  make create-eks-cluster
 }
 
 # 確認CloudFormation 狀態是否完成
