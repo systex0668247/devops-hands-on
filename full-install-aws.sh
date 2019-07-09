@@ -39,14 +39,13 @@ iamrole=$(aws iam get-role --role-name AmazonEKSAdminRole --query 'Role.Arn' --o
 
 # 部屬 EKS
 EKS_ADMIN_ROLE=$iamrole VPC_ID=$vpcid SUBNET1=$Subnet01 SUBNET2=$Subnet02 SUBNET3=$Subnet03  make create-eks-cluster
-sleep 36000
 }
 
 # 確認CloudFormation 狀態是否完成
 checkeksstatus() {
 while [ $(aws cloudformation describe-stacks --stack-name eksdemo |jq -r '.Stacks[].StackStatus') != 'CREATE_COMPLETE' ]
 do
-   echo "EKS not ready, please wait some time"
+   sleep 10
 done
 }
 
@@ -303,9 +302,13 @@ rm -rf devops-hands-on
 
 git clone https://github.com/abola/devops-hands-on.git
 
-initParameter
-createProject
-createK8S
+installeks
+checkeksstatus
+createecr
+installKubectl
+updaterole
+updatekubectlconfigure
+
 installHelm
 installJenkins
 installIstio
