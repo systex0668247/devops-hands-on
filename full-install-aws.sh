@@ -46,7 +46,7 @@ sleep 36000
 checkeksstatus() {
 while [ $(aws cloudformation describe-stacks --stack-name eksdemo |jq -r '.Stacks[].StackStatus') != 'CREATE_COMPLETE' ]
 do
-   echo "EKS no ready"
+   echo "EKS not ready, please wait some time"
 done
 }
 
