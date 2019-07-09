@@ -44,13 +44,9 @@ sleep 36000
 
 # 確認CloudFormation 狀態是否完成
 checkeksstatus() {
-while true; do 
-	status=$(aws cloudformation describe-stacks --stack-name eksdemo |jq -r '.Stacks[].StackStatus')
-	while ($status -ne "CREATE_COMPLETE"); do 
-	    echo "EKS 還在建立中"
-		sleep 3600
-	done
-	echo $status
+while [ $(aws cloudformation describe-stacks --stack-name eksdemo |jq -r '.Stacks[].StackStatus') != 'CREATE_COMPLETE' ]
+do
+   echo "EKS no ready"
 done
 }
 
