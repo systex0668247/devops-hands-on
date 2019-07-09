@@ -9,6 +9,7 @@
 ###
 AWS_REGION=us-west-2
 AWS_ACCOUT_ID=348053640110
+CURRENT_HOME=$(pwd)
 
 
 initialclient(){
