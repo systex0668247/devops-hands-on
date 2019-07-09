@@ -62,7 +62,7 @@ echo "ecr的 token 在 $CURRENT_HOME/.docker/config.json"
 installKubectl() {
   echo "正在安裝 kubectl 指令..."
   printf "  安裝 kubectl 套件中......"
-  yum -y install kubectl > /dev/null 2>&1 && echo "完成"
+  apt-get -y install kubectl > /dev/null 2>&1 && echo "完成"
 }
 
 # 執行更新IAM role
