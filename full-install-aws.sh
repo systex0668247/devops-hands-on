@@ -34,9 +34,6 @@ Subnet01=$(aws ec2 describe-subnets --filters Name=tag:Name,Values=${VPC_STACK_N
 Subnet02=$(aws ec2 describe-subnets --filters Name=tag:Name,Values=${VPC_STACK_NAME}-Subnet02 |jq -r '.Subnets[].SubnetId')
 Subnet03=$(aws ec2 describe-subnets --filters Name=tag:Name,Values=${VPC_STACK_NAME}-Subnet03 |jq -r '.Subnets[].SubnetId')
 
-# 建立AmazonEKSAdminRole IAM Role
-iamrole=$(aws iam get-role --role-name AmazonEKSAdminRole --query 'Role.Arn' --output text)
-
 # 部屬 EKS
 EKS_ADMIN_ROLE=$iamrole VPC_ID=$vpcid SUBNET1=$Subnet01 SUBNET2=$Subnet02 SUBNET3=$Subnet03  make create-eks-cluster
 sleep 36000
@@ -78,6 +75,8 @@ aws iam update-assume-role-policy --role-name AmazonEKSAdminRole --policy-docume
 # 更新kubectl configure
 updatekubectlconfigure() {
 cd $CURRENT_HOME/eks-templates
+# AmazonEKSAdminRole IAM Role
+iamrole=$(aws iam get-role --role-name AmazonEKSAdminRole --query 'Role.Arn' --output text)
 aws --region us-east-2 eks update-kubeconfig --name eksdemo --role-arn $iamrole
 }
 
