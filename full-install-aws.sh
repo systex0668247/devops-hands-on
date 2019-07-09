@@ -7,8 +7,12 @@
 ###########
 # 專案 AWS 建立
 ###
+AWS_REGION=
+AWS_ACCOUT_ID=
 
 
+
+initialclient(){
 # 安裝aws cli
 sudo apt-get -y install python3.6 python3-pip
 pip3 install awscli --upgrade --user
@@ -17,9 +21,9 @@ echo "到AWS 的IAM 上取得帳號的 Access Key ID 和 Secret access key"
 # 確認使用者是否登入
 echo "輸入剛剛取得的 Access Key ID 和 Secret access key"
 aws configure
+}
 
-
-# install eks
+# Install eks
 installeks() {
 cd $CURRENT_HOME
 # 下載安裝包
@@ -27,7 +31,7 @@ git clone https://github.com/harryliu123/eks-templates
 cd eks-templates
 # 建立VPC
 export VPC_STACK_NAME=eks-service
-aws cloudformation create-stack  --stack-name ${VPC_STACK_NAME} --template-body file://eks-vpc.yaml --region us-east-2
+aws cloudformation create-stack  --stack-name ${VPC_STACK_NAME} --template-body file://eks-vpc.yaml --region $AWS_REGION
 sleep 5
 vpcid=$(aws ec2 describe-vpcs --filters Name=tag:Name,Values=${VPC_STACK_NAME}-VPC |jq -r  '.Vpcs[].VpcId')
 Subnet01=$(aws ec2 describe-subnets --filters Name=tag:Name,Values=${VPC_STACK_NAME}-Subnet01 |jq -r '.Subnets[].SubnetId')
@@ -302,6 +306,8 @@ rm -rf devops-hands-on
 
 git clone https://github.com/abola/devops-hands-on.git
 
+
+initialclient
 installeks
 checkeksstatus
 createecr
