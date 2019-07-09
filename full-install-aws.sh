@@ -25,7 +25,6 @@ cd $CURRENT_HOME
 # 下載安裝包
 git clone https://github.com/harryliu123/eks-templates
 cd eks-templates
-
 # 建立VPC
 export VPC_STACK_NAME=eks-service
 aws cloudformation create-stack  --stack-name ${VPC_STACK_NAME} --template-body file://eks-vpc.yaml --region us-east-2
@@ -72,11 +71,13 @@ installKubectl() {
 
 # 執行更新IAM role
 updaterole(){
+cd $CURRENT_HOME/eks-templates
 aws iam update-assume-role-policy --role-name AmazonEKSAdminRole --policy-document file://assume-role-policy.json
 }
 
 # 更新kubectl configure
 updatekubectlconfigure() {
+cd $CURRENT_HOME/eks-templates
 aws --region us-east-2 eks update-kubeconfig --name eksdemo --role-arn $iamrole
 }
 
