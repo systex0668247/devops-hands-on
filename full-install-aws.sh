@@ -231,6 +231,10 @@ installEFK() {
 
 }
 
+installkeycloak(){
+helm install --name keycloak stable / keycloak
+keycloakpw=$(kubectl get secret --namespace default keycloak-http -o jsonpath="{.data.password}" | base64 --decode)
+}
 
 
 installKSM() {
@@ -338,7 +342,7 @@ echo "GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID" >> ~/.my-env
 echo "GOOGLE_ZONE=$GOOGLE_ZONE" >> ~/.my-env
 echo "GOOGLE_GKE_NAME=$GOOGLE_GKE_NAME" >> ~/.my-env
 echo "INGRESS_HOST=$INGRESS_HOST" >> ~/.my-env
-
+echo "KeycloakPW=$keycloakpw" >> ~/.my-env
 cat <<EOF
 -------------------------------------------------------------
 環境安裝完成
@@ -349,5 +353,6 @@ Kiali Service Graph    : http://kiali.$INGRESS_HOST.nip.io/
 Jaeger Tracing         : http://jaeger.$INGRESS_HOST.nip.io/
 Kibana Logging         : http://kibana.$INGRESS_HOST.nip.io/
 Jenkins CI/CD          : http://jenkins.$INGRESS_HOST.nip.io/
+Keycloak               : http://keycloak.$INGRESS_HOST.nip.io/    $keycloakpw
 -------------------------------------------------------------
 EOF
