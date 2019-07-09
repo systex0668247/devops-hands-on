@@ -86,7 +86,7 @@ updatekubectlconfigure() {
 cd $CURRENT_HOME/eks-templates
 # AmazonEKSAdminRole IAM Role
 iamrole=$(aws iam get-role --role-name AmazonEKSAdminRole --query 'Role.Arn' --output text)
-aws --region us-east-2 eks update-kubeconfig --name eksdemo --role-arn $iamrole
+aws --region $AWS_REGION eks update-kubeconfig --name eksdemo --role-arn $iamrole
 }
 
 
