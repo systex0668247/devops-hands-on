@@ -45,6 +45,9 @@ aws iam attach-role-policy --role-name AmazonEKSAdminRole --policy-arn arn:aws:i
 aws iam put-role-policy --role-name AmazonEKSAdminRole --policy-name EKSAdminExtraPolicies --policy-document file://eks-admin-iam-policy.json
 iamrole=$(aws iam get-role --role-name AmazonEKSAdminRole --query 'Role.Arn' --output text)
 
+# 新增建立ec2的key-pair 請妥善保管登入worker node 可以用
+aws ec2 create-key-pair --key-name eksworkshop --query 'eksworkshop' --output text > $CURRENT_HOME/eksworkshop.pem
+
 # 部屬 EKS
 REGION=$AWS_REGION EKS_ADMIN_ROLE=$iamrole VPC_ID=$vpcid SUBNET1=$Subnet01 SUBNET2=$Subnet02 SUBNET3=$Subnet03  make create-eks-cluster
 }
