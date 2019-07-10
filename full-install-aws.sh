@@ -85,6 +85,11 @@ sed -i "s/harry-admin/${iamuseraccount}/g" assume-role-policy.json
 aws iam update-assume-role-policy --role-name AmazonEKSAdminRole --policy-document file://assume-role-policy.json
 }
 
+createiamgroup(){
+aws iam put-group-policy --group-name EKSAdmin --policy-document file://getroleallow.json --policy-name EKSAdmingrouprole
+echo "記得將IAM user 加入倒 EKSAdmin群組, 然後每個人都要執行 updatekubectlconfigure()"
+}
+
 # 更新kubectl configure
 updatekubectlconfigure() {
 cd $CURRENT_HOME/eks-templates
@@ -235,6 +240,7 @@ installEFK() {
 installkeycloak(){
 helm install --name keycloak stable / keycloak
 keycloakpw=$(kubectl get secret --namespace default keycloak-http -o jsonpath="{.data.password}" | base64 --decode)
+echo "帳號為 keycloak  密碼為 $keycloakpw "
 }
 
 
@@ -329,6 +335,7 @@ createecr
 installKubectl
 updaterole
 updatekubectlconfigure
+createiamgroup
 
 installHelm
 installJenkins
