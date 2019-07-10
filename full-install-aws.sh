@@ -238,9 +238,9 @@ installEFK() {
 }
 
 installkeycloak(){
-helm install --name keycloak stable / keycloak
-keycloakpw=$(kubectl get secret --namespace default keycloak-http -o jsonpath="{.data.password}" | base64 --decode)
-echo "帳號為 keycloak  密碼為 $keycloakpw "
+helm install --name keycloak -f keycloak-values.yaml stable/keycloak
+# keycloakpw=$(kubectl get secret --namespace default keycloak-http -o jsonpath="{.data.password}" | base64 --decode)
+echo "帳號為 admin  密碼為 systex "
 }
 
 
