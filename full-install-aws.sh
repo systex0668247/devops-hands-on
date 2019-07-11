@@ -323,6 +323,8 @@ setupService() {
 createhaproxy(){
 ingressgateway=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.EXTERNAL-IP[0].ip})
 sed -i "s/ingressgateway/${ingressgateway}/g" Haproxy-create.yaml
+aws cloudformation create-stack  --stack-name  Haproxy-create --template-body file://Haproxy-create.yaml --region $AWS_REGION
+sleep 20
 }
 
 CURRENT_HOME=$(pwd)
