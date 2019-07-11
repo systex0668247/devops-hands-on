@@ -319,6 +319,12 @@ setupService() {
   helm template --set istio.ingressgateway.ip=$INGRESS_HOST devops-hands-on/svc | kubectl apply -f - > /dev/null 2>&1 && echo "完成"
 }
 
+
+createhaproxy(){
+ingressgateway=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.EXTERNAL-IP[0].ip})
+sed -i "s/ingressgateway/${ingressgateway}/g" Haproxy-create.yaml
+}
+
 CURRENT_HOME=$(pwd)
 
 rm -rf ~/.my-env
@@ -344,6 +350,7 @@ installEFK
 installKSM
 setupService
 confirmInstall
+createhaproxy
 
 > ~/.my-env
 echo "GOOGLE_PROJECT_ID=$GOOGLE_PROJECT_ID" >> ~/.my-env
