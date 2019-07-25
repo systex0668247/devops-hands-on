@@ -1,0 +1,97 @@
+# 產生憑證 建立 secret
+# git clone https://github.com/nicholasjackson/mtls-go-example
+# cd mtls-go-example
+# ./generate.sh keycloak.pluto.ezlab.xyz 123456
+# mkdir ./../keycloak.pluto.ezlab.xyz && mv 1_root 2_intermediate 3_application 4_client ./../keycloak.pluto.ezlab.xyz
+# cd ..
+ 
+# kubectl create secret generic keycloak-credential \
+#--from-file=key=keycloak.pluto.ezlab.xyz/3_application/private/keycloak.pluto.ezlab.xyz.key.pem \
+#--from-file=cert=keycloak.pluto.ezlab.xyz/3_application/certs/keycloak.pluto.ezlab.xyz.cert.pem
+
+
+
+
+
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: devops-camp-gateway
+  namespace: default
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - keycloak.pluto.ezlab.xyz
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE # PASSTHROUGH 可接受istio1.1以前版本 credentialName就不需要了
+      credentialName: keycloak-credential
+  - hosts:
+    - '*'
+    port:
+      name: http
+      number: 80
+      protocol: HTTP
+	  
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: keycloak
+  namespace: default
+spec:
+  gateways:
+  - devops-camp-gateway
+  hosts:
+  - keycloak.pluto.ezlab.xyz
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: keycloak.default.svc.cluster.local
+        port:
+          number: 80
+  tls:
+  - match:
+    - port: 443
+      sni_hosts:
+      - keycloak.pluto.ezlab.xyz
+    route:
+    - destination:
+        host: keycloak.default.svc.cluster.local
+        port:
+          number: 443
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: keycloak
+  name: keycloak
+  namespace: default
+spec:
+  clusterIP: 172.20.182.244
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 8443
+  selector:
+    app: keycloak
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
+
+---
