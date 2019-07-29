@@ -27,7 +27,7 @@ installKSM
 outputingress
 printVirtualService
 windowspodInwnode
-EnvAndMssage
+EnvAndMessage
 
 #######################################################
 
@@ -404,7 +404,7 @@ EOF
 }
 
 
-EnvAndMssage(){
+EnvAndMessage(){
 > ~/.my-env
 echo "INGRESS_HOST=$INGRESS_HOST" >> ~/.my-env
 cat <<EOF
