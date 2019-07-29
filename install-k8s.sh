@@ -65,7 +65,7 @@ initParameter() {
 
   # GOOGLE_GCE_IMAGE
   if [ -z $GOOGLE_GKE_VERSION  ]; then
-    GOOGLE_GKE_VERSION=1.11.8-gke.6
+    GOOGLE_GKE_VERSION=1.12.8-gke.10
     echo "  未定義 GOOGLE_GKE_VERSION.  使用預設值.......(GOOGLE_GKE_VERSION=$GOOGLE_GKE_VERSION)"
   fi
 
