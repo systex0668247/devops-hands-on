@@ -1,6 +1,6 @@
 #######################################################
 # 無法在Azure shell或是 aws shell上執行, 因為沒有docker daemon可以使用
-# 可以在GCP 的cloud 或自己的電腦使用
+# 請使用 在GCP 的cloud : https://console.cloud.google.com
 #######################################################
 Random=$(cat /proc/sys/kernel/random/uuid | cut -b -6)
 
@@ -45,7 +45,7 @@ sudo apt-get install azure-cli > /dev/null 2>&1
 }
 
 azlogin(){
-echo "請依提示上的網址連線並輸入驗證碼和登入azure"
+echo "請依提示上的網址連線並輸入提示的驗證碼和登入azure"
 az login
 
 # 載入模組
