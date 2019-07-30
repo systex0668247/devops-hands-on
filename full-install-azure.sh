@@ -17,7 +17,8 @@ k8sversion=1.14.1
 ######################################################
 # 執行
 main() {
-if [ $1 == "del" ]; then
+if [ $1 == "del" ] 
+then
  deleteResoureGroup
 else
  installazcli
