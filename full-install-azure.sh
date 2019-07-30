@@ -10,6 +10,7 @@ REGION=eastasia
 myResourceGroup=LabResourceGroup$Random
 PASSWORD_WIN="P@ssw0rd1234"
 myAKSClustername=LabAKSCluster$Random
+Registryname=$myResourceGroup$Random
 ######################################################
 # 執行
 main() {
@@ -171,7 +172,6 @@ EOF
 
 InstallAcrJenkins(){
 # ACS & jenkins
-Registryname=$myResourceGroup$Random
 az acr create --resource-group $myResourceGroup --name $Registryname --sku Basic > /dev/null 2>&1 && echo "建立ACR"
 ## loginserver 為 $Registryname.azurecr.io
 # az acr login --name $Registryname  # 不能再azure shell執行 因為沒有docker
@@ -219,19 +219,10 @@ echo "上傳必要images 到ACR上"
  docker push $Registryname.azurecr.io/debian9:2.2 > /dev/null 2>&1
  
  # 建立一個 secret 讓AKS 可以取得ACR
+ kubectl create namespace logging > /dev/null 2>&1
  kubectl -n logging create secret docker-registry acr-auth --docker-server $Registryname.azurecr.io --docker-username $SP_APP_ID --docker-password $SP_PASSWD
- kubectl create namespace logging
- cat <<EOF | kubectl apply -f - > /dev/null 2>&1
- apiVersion: v1
- kind: ServiceAccount
- metadata:
-     name: logging
-     namespace: logging
- EOF
- kubectl patch serviceaccount logging -n logging -p '{"imagePullSecrets": [{"name": "acr-auth"}]}' > /dev/null 2>&1
- 
-
- kubectl create configmap google-container-key --from-file=.docker/config.json  > /dev/null 2>&1
+  # 建立一個讓jenkins 可以用的docker 權限
+  kubectl create configmap google-container-key --from-file=.docker/config.json  > /dev/null 2>&1
 
   kubectl create sa jenkins-deployer > /dev/null 2>&1
   kubectl create clusterrolebinding jenkins-deployer-role --clusterrole=cluster-admin --serviceaccount=default:jenkins-deployer > /dev/null 2>&1
