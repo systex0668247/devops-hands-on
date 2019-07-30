@@ -435,7 +435,7 @@ deleteResoureGroup(){
 #echo "列出所有ResoureGroup"
 #az group list |grep name
 echo "刪除ResoureGroup"
-for i in `az group list -o tsv --query [].name`; do  az group delete -n $i  --no-wait; done
+for i in `az group list -o tsv --query [].name`; do echo $i && az group delete -n $i  --no-wait; done
 }
 ##################################################################
 
