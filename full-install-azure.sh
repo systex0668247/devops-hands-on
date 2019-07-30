@@ -1,7 +1,8 @@
 #######################################################
 # 無法在Azure shell或是 aws shell上執行, 因為沒有docker daemon可以使用
 # 請使用 在GCP 的cloud : https://console.cloud.google.com
-# 直接執行 bash <(curl -L https://raw.githubusercontent.com/harryliu123/devops-hands-on/master/full-install-azure.sh)
+# 新增請直接執行      bash <(curl -L https://raw.githubusercontent.com/harryliu123/devops-hands-on/master/full-install-azure.sh)
+# 刪除所有資源請執行  bash <(curl -L https://raw.githubusercontent.com/harryliu123/devops-hands-on/master/full-install-azure.sh del)
 #######################################################
 Random=$(cat /proc/sys/kernel/random/uuid | cut -b -6)
 
@@ -16,22 +17,25 @@ k8sversion=1.14.1
 ######################################################
 # 執行
 main() {
-installazcli
-azlogin
-ResourceGroupCreate
-AKSCreate
-kubeconfig
-setwnodeNoSchedule
-changestorageclass
-installistio
-InstallAcrJenkins
-installEFK
-installKSM
-outputingress
-printVirtualService
-windowspodInwnode
-EnvAndMessage
-#deleteResoureGroup  # if clean 
+if [ $1 = "del" ] then
+ deleteResoureGroup
+else
+ installazcli
+ azlogin
+ ResourceGroupCreate
+ AKSCreate
+ kubeconfig
+ setwnodeNoSchedule
+ changestorageclass
+ installistio
+ InstallAcrJenkins
+ installEFK
+ installKSM
+ outputingress
+ printVirtualService
+ windowspodInwnode
+ EnvAndMessage
+fi
 }
 #######################################################
 
