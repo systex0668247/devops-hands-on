@@ -138,7 +138,7 @@ data:
   passphrase: c3lzdGV4
 EOF
 
-  helm template install/kubernetes/helm/istio-init --name istio-init --namespace istio-system | kubectl apply -f - /dev/null 2>&1
+  helm template install/kubernetes/helm/istio-init --name istio-init --namespace istio-system | kubectl apply -f - > /dev/null 2>&1
   helm template install/kubernetes/helm/istio \
     --name istio --namespace istio-system \
     --set sidecarInjectorWebhook.enabled=true \
@@ -152,7 +152,7 @@ EOF
     --set kiali.createDemoSecret=true \
 	--set gateways.istio-egressgateway.enabled=false \
 	--set gateways.istio-ingressgateway.sds.enabled=true \
-  |  kubectl apply -f - 
+  |  kubectl apply -f - > /dev/null 2>&1
   printf "等待服務啟動中..."
   while [ `kubectl get po -n istio-system | grep istio-sidecar-injector | grep Running | grep '1/1' | wc -l` -eq 0 ]
   do
@@ -326,19 +326,19 @@ installKSM() {
   kubectl apply -f devops-hands-on/kube-state-metrics/prometheus-metrics_manifest.yaml --namespace logging  > /dev/null 2>&1 && echo "完成"
   
   # 讓 AKS 可以去ACR 拉images
-  kubectl patch serviceaccount prometheus-metrics-alertmanager -n logging -p '{"imagePullSecrets": [{"name": "acr-auth"}]}'
-  kubectl patch serviceaccount prometheus-metrics-grafana -n logging -p '{"imagePullSecrets": [{"name": "acr-auth"}]}'
-  kubectl patch serviceaccount prometheus-metrics-kube-state-metrics -n logging -p '{"imagePullSecrets": [{"name": "acr-auth"}]}'
-  kubectl patch serviceaccount prometheus-metrics-node-exporter  -n logging -p '{"imagePullSecrets": [{"name": "acr-auth"}]}'
-  kubectl patch serviceaccount prometheus-metrics-prometheus -n logging -p '{"imagePullSecrets": [{"name": "acr-auth"}]}'
-  kubectl patch serviceaccount default -n logging -p '{"imagePullSecrets": [{"name": "acr-auth"}]}'
+  kubectl patch serviceaccount prometheus-metrics-alertmanager -n logging -p '{"imagePullSecrets": [{"name": "acr-auth"}]}' > /dev/null 2>&1
+  kubectl patch serviceaccount prometheus-metrics-grafana -n logging -p '{"imagePullSecrets": [{"name": "acr-auth"}]}' > /dev/null 2>&1
+  kubectl patch serviceaccount prometheus-metrics-kube-state-metrics -n logging -p '{"imagePullSecrets": [{"name": "acr-auth"}]}' > /dev/null 2>&1
+  kubectl patch serviceaccount prometheus-metrics-node-exporter  -n logging -p '{"imagePullSecrets": [{"name": "acr-auth"}]}' > /dev/null 2>&1
+  kubectl patch serviceaccount prometheus-metrics-prometheus -n logging -p '{"imagePullSecrets": [{"name": "acr-auth"}]}' > /dev/null 2>&1
+  kubectl patch serviceaccount default -n logging -p '{"imagePullSecrets": [{"name": "acr-auth"}]}' > /dev/null 2>&1
 
 }
 
 outputingress(){
 # 將服務打出來
  INGRESS_HOST=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
- helm template --set istio.ingressgateway.ip=$INGRESS_HOST devops-hands-on/svc | kubectl apply -f -
+ helm template --set istio.ingressgateway.ip=$INGRESS_HOST devops-hands-on/svc | kubectl apply -f - > /dev/null 2>&1
 }
 
 printVirtualService(){
@@ -354,7 +354,7 @@ windowspodInwnode(){
 # 如果是使用windows node 時
 ###  不能給istio的sidecar injector 因為sidecar是linux
 #########################################################
-cat <<EOF | kubectl apply -f -
+cat <<EOF | kubectl apply -f - > /dev/null 2>&1
 apiVersion: v1
 kind: Service
 metadata:
