@@ -12,6 +12,7 @@ myResourceGroup=LabResourceGroup$Random
 PASSWORD_WIN="P@ssw0rd1234"
 myAKSClustername=LabAKSCluster$Random
 Registryname=$myResourceGroup$Random
+k8sversion=1.14.1
 ######################################################
 # 執行
 main() {
@@ -74,7 +75,7 @@ az aks create \
     --name $myAKSClustername \
     --node-count 3 \
     --enable-addons monitoring \
-    --kubernetes-version 1.14.1 \
+    --kubernetes-version $k8sversion \
     --generate-ssh-keys \
     --windows-admin-password $PASSWORD_WIN \
     --windows-admin-username azureuser \
@@ -91,7 +92,7 @@ az aks nodepool add \
     --name wnode1 \
     --node-count 1 \
     --node-vm-size Standard_D4s_v3 \
-    --kubernetes-version 1.14.1  > /dev/null 2>&1
+    --kubernetes-version $k8sversion  > /dev/null 2>&1
 }
 
 
