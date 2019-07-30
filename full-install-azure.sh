@@ -279,7 +279,7 @@ metadata:
 parameters:
   cachingmode: ReadOnly
   kind: Managed
-  storageaccounttype: Standard_LRS
+  storageaccounttype: Premium_LRS
 provisioner: kubernetes.io/azure-disk
 reclaimPolicy: Delete
 volumeBindingMode: Immediate
