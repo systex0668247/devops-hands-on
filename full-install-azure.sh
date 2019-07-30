@@ -30,6 +30,7 @@ outputingress
 printVirtualService
 windowspodInwnode
 EnvAndMessage
+#deleteResoureGroup  # if clean 
 }
 #######################################################
 
@@ -415,6 +416,11 @@ Kibana Logging         : http://kibana.$INGRESS_HOST.nip.io/
 Jenkins CI/CD          : http://jenkins.$INGRESS_HOST.nip.io/
 -------------------------------------------------------------
 EOF
+}
+
+deleteResoureGroup(){
+az group delete --name $myResourceGroup
+az group delete --name "MC_"$myResourceGroup"_"$myResourceGroup"_"$REGION
 }
 ##################################################################
 
