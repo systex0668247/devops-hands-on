@@ -427,7 +427,7 @@ EOF
 
 deleteResoureGroup(){
 echo "列出所有ResoureGroup"
-az group list
+az group list |grep name
 echo "----------------------------"
 echo "刪除ResoureGroup"
 echo "語法: az group delete --name <ResourceGroup>"
