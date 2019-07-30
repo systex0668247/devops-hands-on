@@ -419,6 +419,10 @@ EOF
 }
 
 deleteResoureGroup(){
+echo "列出所有ResoureGroup"
+az group list
+echo "----------------------------"
+echo "刪除ResoureGroup"
 az group delete --name $myResourceGroup
 az group delete --name "MC_"$myResourceGroup"_"$myResourceGroup"_"$REGION
 }
