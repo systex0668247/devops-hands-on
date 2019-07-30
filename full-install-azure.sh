@@ -337,9 +337,9 @@ installKSM() {
   while [ `kubectl get po -n logging | grep prometheus-metrics-grafana | grep Running | grep '1/1' | wc -l` -eq 0 ]
   do
   sleep 5
-  kubectl delete pod -n logging `kubectl get pods -n logging| awk '$3 == "Init:ImagePullBackOff" {print $1}'`
-  kubectl delete pod -n logging `kubectl get pods -n logging| awk '$3 == "ImagePullBackOff" {print $1}'`
-  kubectl delete pod -n logging `kubectl get pods -n logging| awk '$3 == "CrashLoopBackOff" {print $1}'`
+  kubectl delete pod -n logging `kubectl get pods -n logging| awk '$3 == "Init:ImagePullBackOff" {print $1}'` > /dev/null 2>&1
+  kubectl delete pod -n logging `kubectl get pods -n logging| awk '$3 == "ImagePullBackOff" {print $1}'` > /dev/null 2>&1
+  kubectl delete pod -n logging `kubectl get pods -n logging| awk '$3 == "CrashLoopBackOff" {print $1}'` > /dev/null 2>&1
   done
 }
 
