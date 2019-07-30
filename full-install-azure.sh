@@ -324,6 +324,10 @@ installKSM() {
   kubectl patch serviceaccount prometheus-metrics-prometheus -n logging -p '{"imagePullSecrets": [{"name": "acr-auth"}]}' > /dev/null 2>&1
   kubectl patch serviceaccount default -n logging -p '{"imagePullSecrets": [{"name": "acr-auth"}]}' > /dev/null 2>&1
 
+  # 刪除因為還沒設定Secrets 的失敗 pod
+  kubectl delete pod -n logging `kubectl get pods -n logging| awk '$3 == "Init:ImagePullBackOff" {print $1}'`
+  kubectl delete pod -n logging `kubectl get pods -n logging| awk '$3 == "ImagePullBackOff" {print $1}'`
+  kubectl delete pod -n logging `kubectl get pods -n logging| awk '$3 == "CrashLoopBackOff" {print $1}'`
 }
 
 outputingress(){
