@@ -426,13 +426,10 @@ EOF
 }
 
 deleteResoureGroup(){
-echo "列出所有ResoureGroup"
-az group list |grep name
-echo "----------------------------"
+#echo "列出所有ResoureGroup"
+#az group list |grep name
 echo "刪除ResoureGroup"
-echo "語法: az group delete --name <ResourceGroup> --no-wait -y"
-az group delete --name $myResourceGroup --no-wait -y
-az group delete --name "MC_"$myResourceGroup"_"$myResourceGroup"_"$REGION --no-wait -y
+for i in `az group list -o tsv --query [].name`; do  az group delete -n $i  --no-wait; done
 }
 ##################################################################
 
