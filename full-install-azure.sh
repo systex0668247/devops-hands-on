@@ -1,8 +1,8 @@
 #######################################################
 # 無法在Azure shell或是 aws shell上執行, 因為沒有docker daemon可以使用
 # 請使用 在GCP 的cloud : https://console.cloud.google.com
-# 新增請直接執行      bash <(curl -L https://raw.githubusercontent.com/harryliu123/devops-hands-on/master/full-install-azure.sh)
-# 刪除所有資源請執行  bash <(curl -L https://raw.githubusercontent.com/harryliu123/devops-hands-on/master/full-install-azure.sh del) 
+# 新增請直接執行      bash <(curl -L https://raw.githubusercontent.com/harryliu123/devops-hands-on/master/full-install-azure.sh create)
+# 刪除所有資源請執行  bash <(curl -L https://raw.githubusercontent.com/harryliu123/devops-hands-on/master/full-install-azure.sh delete) 
 #######################################################
 Random=$(cat /proc/sys/kernel/random/uuid | cut -b -6)
 
@@ -17,10 +17,11 @@ k8sversion=1.14.1
 ######################################################
 # 執行
 main() {
-if [ $1 = "del" ] 
-then
+if [ $1 = delete ]; then
+ azlogin
  deleteResoureGroup
-else
+fi
+if [ $1 = create ]; then
  installazcli
  azlogin
  ResourceGroupCreate
@@ -438,6 +439,6 @@ for i in `az group list -o tsv --query [].name`; do  az group delete -n $i  --no
 }
 ##################################################################
 
-main
+main $1
 
 ###############################################################
