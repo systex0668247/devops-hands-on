@@ -417,7 +417,7 @@ cat <<EOF
 ----------
 Istio Bookinfo 示範程式: http://bookinfo.$INGRESS_HOST.nip.io/
 K8S Health Monitoring  : http://grafana.$INGRESS_HOST.nip.io/
-Kiali Service Graph    : http://kiali.$INGRESS_HOST.nip.io/
+Kiali Service Graph    : http://kiali.$INGRESS_HOST.nip.io/kiali/console
 Jaeger Tracing         : http://jaeger.$INGRESS_HOST.nip.io/
 Kibana Logging         : http://kibana.$INGRESS_HOST.nip.io/
 Jenkins CI/CD          : http://jenkins.$INGRESS_HOST.nip.io/
