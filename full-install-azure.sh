@@ -430,9 +430,9 @@ echo "列出所有ResoureGroup"
 az group list |grep name
 echo "----------------------------"
 echo "刪除ResoureGroup"
-echo "語法: az group delete --name <ResourceGroup>"
-az group delete --name $myResourceGroup
-az group delete --name "MC_"$myResourceGroup"_"$myResourceGroup"_"$REGION
+echo "語法: az group delete --name <ResourceGroup> --no-wait -y"
+az group delete --name $myResourceGroup --no-wait -y
+az group delete --name "MC_"$myResourceGroup"_"$myResourceGroup"_"$REGION --no-wait -y
 }
 ##################################################################
 
