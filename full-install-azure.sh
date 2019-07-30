@@ -82,6 +82,7 @@ az aks create \
     --network-plugin azure  > /dev/null 2>&1
 
 # 建立 windows node
+# v3 系列的node 例如 Standard_D4s_v3 可以開hyper-v container
 echo "建立一個windows worknode...等待7~10分鐘"
 az aks nodepool add \
     --resource-group $myResourceGroup \
@@ -89,6 +90,7 @@ az aks nodepool add \
     --os-type Windows \
     --name wnode1 \
     --node-count 1 \
+    --node-vm-size Standard_D4s_v3 \
     --kubernetes-version 1.14.1  > /dev/null 2>&1
 }
 
