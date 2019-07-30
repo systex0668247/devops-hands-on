@@ -31,6 +31,8 @@ printVirtualService
 windowspodInwnode
 EnvAndMessage
 }
+
+main
 #######################################################
 
 installazcli(){
