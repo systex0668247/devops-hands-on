@@ -126,7 +126,8 @@ sleep 10
 
 ## 安裝istio 加入其他工具
 kubectl create namespace istio-system > /dev/null 2>&1 
-cat <<EOF | kubectl apply -f - > /dev/null 2>&1
+sleep 1
+cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: Secret
 metadata:
