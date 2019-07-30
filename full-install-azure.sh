@@ -11,7 +11,24 @@ myResourceGroup=LabResourceGroup$Random
 PASSWORD_WIN="P@ssw0rd1234"
 myAKSClustername=LabAKSCluster$Random
 ######################################################
-
+# 執行
+main() {
+installazcli
+azlogin
+ResourceGroupCreate
+AKSCreate
+kubeconfig
+setwnodeNoSchedule
+changestorageclass
+installistio
+InstallAcrJenkins
+installEFK
+installKSM
+outputingress
+printVirtualService
+windowspodInwnode
+EnvAndMessage
+}
 #######################################################
 
 installazcli(){
@@ -404,21 +421,4 @@ Jenkins CI/CD          : http://jenkins.$INGRESS_HOST.nip.io/
 EOF
 }
 
-
 ###############################################################
-# 執行
-installazcli
-azlogin
-ResourceGroupCreate
-AKSCreate
-kubeconfig
-setwnodeNoSchedule
-changestorageclass
-installistio
-InstallAcrJenkins
-installEFK
-installKSM
-outputingress
-printVirtualService
-windowspodInwnode
-EnvAndMessage
