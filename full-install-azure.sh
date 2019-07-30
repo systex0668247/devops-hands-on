@@ -173,23 +173,22 @@ EOF
 InstallAcrJenkins(){
 # ACS & jenkins
 az acr create --resource-group $myResourceGroup --name $Registryname --sku Basic > /dev/null 2>&1 && echo "建立ACR"
+sleep 6
 ## loginserver 為 $Registryname.azurecr.io
 # az acr login --name $Registryname  # 不能再azure shell執行 因為沒有docker
 ## ACS 授權 
-# https://docs.microsoft.com/zh-tw/azure/container-registry/container-registry-auth-service-principal
-
+# https://docs.microsoft.com/zh-tw/azure/container-registry/container-registry-auth-service-principalleep
 # 新增AAD service account 授權可以使用ACR
 SERVICE_PRINCIPAL_NAME=acr-service-principal
 ACR_REGISTRY_ID=$(az acr show --name $Registryname --query id --output tsv) 
 SP_PASSWD=$(az ad sp create-for-rbac --name http://$SERVICE_PRINCIPAL_NAME --scopes $ACR_REGISTRY_ID --role owner --query password --output tsv)  > /dev/null 2>&1
 SP_APP_ID=$(az ad sp show --id http://$SERVICE_PRINCIPAL_NAME --query appId --output tsv)
 
- # 建立一個 secret 讓AKS 可以取得ACR
- kubectl create secret docker-registry acr-auth --docker-server $Registryname.azurecr.io --docker-username $SP_APP_ID --docker-password $SP_PASSWD -n logging > /dev/null 2>&1
-
 ## AAD 帳號密碼
-# echo "Service principal ID: $SP_APP_ID"
-# echo "Service principal password: $SP_PASSWD"
+echo "ACR可以用的帳號"
+echo "Service principal ID: $SP_APP_ID"
+echo "ACR可以用的密碼"
+echo "Service principal password: $SP_PASSWD"
 
 docker login -u $SP_APP_ID -p $SP_PASSWD $Registryname.azurecr.io > /dev/null 2>&1
 
