@@ -423,6 +423,7 @@ echo "列出所有ResoureGroup"
 az group list
 echo "----------------------------"
 echo "刪除ResoureGroup"
+echo "語法: az group delete --name <ResourceGroup>"
 az group delete --name $myResourceGroup
 az group delete --name "MC_"$myResourceGroup"_"$myResourceGroup"_"$REGION
 }
