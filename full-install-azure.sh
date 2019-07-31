@@ -55,10 +55,10 @@ sudo apt-get install azure-cli > /dev/null 2>&1
 }
 
 azlogin(){
-echo "REGION=eastasia"
-echo "myResourceGroup=LabResourceGroup"$Random
-echo "myAKSClustername=LabAKSCluster"$Random
-echo "Registryname="$myResourceGroup$Random
+echo "REGION="$REGION
+echo "myResourceGroup="$myResourceGroup
+echo "myAKSClustername="$myAKSClustername
+echo "Registryname="$Registryname
 
 echo "請依提示上的網址連線並輸入提示的驗證碼和登入azure"
 az login
