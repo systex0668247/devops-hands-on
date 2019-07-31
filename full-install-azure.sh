@@ -5,7 +5,8 @@
 # 其他使用者連線AKS  bash <(curl -L https://raw.githubusercontent.com/harryliu123/devops-hands-on/master/full-install-azure.sh) connect 
 # 刪除所有資源請執行  bash <(curl -L https://raw.githubusercontent.com/harryliu123/devops-hands-on/master/full-install-azure.sh) delete 
 #######################################################
-Random=$(cat /proc/sys/kernel/random/uuid | cut -b -6)
+Randomvar=$(cat /proc/sys/kernel/random/uuid | cut -b -6)
+Random=$Randomvar
 
 #######################################################
 ## 請修改下面參數
