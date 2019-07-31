@@ -55,6 +55,11 @@ sudo apt-get install azure-cli > /dev/null 2>&1
 }
 
 azlogin(){
+echo "REGION=eastasia"
+echo "myResourceGroup=LabResourceGroup"$Random
+echo "myAKSClustername=LabAKSCluster"$Random
+echo "Registryname="$myResourceGroup$Random
+
 echo "請依提示上的網址連線並輸入提示的驗證碼和登入azure"
 az login
 
@@ -322,9 +327,13 @@ installKSM() {
   printf "  安裝中 ..."
   kubectl apply -f devops-hands-on/kube-state-metrics/app-crd.yaml > /dev/null 2>&1 
   kubectl apply -f devops-hands-on/kube-state-metrics/prometheus-metrics_sa_manifest.yaml --namespace logging > /dev/null 2>&1 
+  sleep 1
   sed -i 's/prometheus:2.2/prometheus\/prometheus:2.2/g' devops-hands-on/kube-state-metrics/prometheus-metrics_manifest.yaml
+  sleep 1
   sed -i 's/marketplace.gcr.io\/google\/prometheus/Registryname.azurecr.io/g' devops-hands-on/kube-state-metrics/prometheus-metrics_manifest.yaml
+  sleep 1
   sed -i "s/Registryname/${Registryname}/g" devops-hands-on/kube-state-metrics/prometheus-metrics_manifest.yaml
+  sleep 1
   kubectl apply -f devops-hands-on/kube-state-metrics/prometheus-metrics_manifest.yaml --namespace logging  > /dev/null 2>&1 && echo "完成"
   
   # 讓 AKS 可以去ACR 拉images
