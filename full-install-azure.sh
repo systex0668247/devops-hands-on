@@ -88,6 +88,10 @@ echo "REGION="$REGION
 echo "myResourceGroup="$myResourceGroup
 echo "myAKSClustername="$myAKSClustername
 echo "Registryname="$Registryname
+echo "REGION="$REGION >> ~/.my-env
+echo "myResourceGroup="$myResourceGroup >> ~/.my-env
+echo "myAKSClustername="$myAKSClustername >> ~/.my-env
+echo "Registryname="$Registryname >> ~/.my-env
 
 #  建立AKS 和一個預設的node
 echo "正在建立AKS以及第三個linux worknode...等待約7~10分鐘"
