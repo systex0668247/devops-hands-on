@@ -2,6 +2,7 @@
 # 無法在Azure shell或是 aws shell上執行, 因為沒有docker daemon可以使用
 # 請使用 在GCP 的cloud : https://console.cloud.google.com
 # 新增請直接執行      bash <(curl -L https://raw.githubusercontent.com/harryliu123/devops-hands-on/master/full-install-azure.sh) create
+# 其他使用者連線AKS  bash <(curl -L https://raw.githubusercontent.com/harryliu123/devops-hands-on/master/full-install-azure.sh) connect 
 # 刪除所有資源請執行  bash <(curl -L https://raw.githubusercontent.com/harryliu123/devops-hands-on/master/full-install-azure.sh) delete 
 #######################################################
 Random=$(cat /proc/sys/kernel/random/uuid | cut -b -6)
@@ -20,6 +21,11 @@ main() {
 if [ $1 = delete ]; then
  azlogin
  deleteResoureGroup
+fi
+if [ $1 = connect ]; then
+ installazcli
+ azlogin
+ connectaks
 fi
 if [ $1 = create ]; then
  installazcli
@@ -55,11 +61,6 @@ sudo apt-get install azure-cli > /dev/null 2>&1
 }
 
 azlogin(){
-echo "REGION="$REGION
-echo "myResourceGroup="$myResourceGroup
-echo "myAKSClustername="$myAKSClustername
-echo "Registryname="$Registryname
-
 echo "請依提示上的網址連線並輸入提示的驗證碼和登入azure"
 az login
 
@@ -79,6 +80,12 @@ az group create --name $myResourceGroup --location $REGION > /dev/null 2>&1
 # az aks get-versions --location $REGION
 
 AKSCreate(){
+# 列出所需參數
+echo "REGION="$REGION
+echo "myResourceGroup="$myResourceGroup
+echo "myAKSClustername="$myAKSClustername
+echo "Registryname="$Registryname
+
 #  建立AKS 和一個預設的node
 echo "正在建立AKS以及第三個linux worknode...等待約7~10分鐘"
 az aks create \
@@ -446,6 +453,15 @@ deleteResoureGroup(){
 echo "刪除ResoureGroup"
 for i in `az group list -o tsv --query [].name`; do echo $i && az group delete -n $i  --no-wait; done
 }
+
+connectaks(){
+az aks install-cli > /dev/null 2>&1
+resourceGroup=$(az aks list| jq -r '.[].resourceGroup')
+name=$(az aks list| jq -r '.[].name')
+az aks get-credentials --resource-group $resourceGroup --name $name
+kubectl get nodes
+}
+
 ##################################################################
 
 main $1
