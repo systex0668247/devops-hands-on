@@ -6,8 +6,9 @@
 # 刪除所有資源請執行  bash <(curl -L https://raw.githubusercontent.com/harryliu123/devops-hands-on/master/full-install-azure.sh) delete 
 # 2019/7/31 建立完成  每日產生 700元台幣費用
 #######################################################
-Randomvar=$(cat /proc/sys/kernel/random/uuid | cut -b -6)
+Randomvar=(awk -v min=100000 -v max=999999 'BEGIN{srand(); print int(min+rand()*(max-min+1))}')
 Random=$Randomvar
+echo "Random=$Randomvar" >> ~/.my-env
 
 #######################################################
 ## 請修改下面參數
