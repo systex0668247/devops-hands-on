@@ -1,33 +1,31 @@
 #!/usr/bin/env bash
-###########
-# 安裝 Lab(k8s) 課程環境
-###########
+#############################################################################
+# 安裝 Lab(k8s) 課程環境，在AWS 建立 EKS & keycloak
+#############################################################################
 
-#!/usr/bin/env bash
-###########
-# 專案 AWS 建立 EKS & keycloak
-###########
+############################################################################
+# 填寫必要變數   
+############################################################################
 
-
-###################
-## 必要變數輸入 ###
-###################
-
-AWS_REGION=<輸入要在哪個region建立>              # us-west-2
-AWS_ACCOUT_ID=<輸入自己的accout_id>              # 348053640110
-iamuseraccount=<請變更自己的AWS上的IAM user>     # A
-
-
-
-CURRENT_HOME=$(pwd)
+AWS_REGION=<輸入要在哪個region建立>              # AWS Region，例如 us-west-2
+AWS_ACCOUT_ID=<輸入自己的accout_id>             # root User ID，例如 348053640110
+iamuseraccount=<請變更自己的AWS上的IAM user>     # IAM 使用者名稱，例如 A506-Harry
+# 執行 Script 時會需要在 互動介面輸入 AWS 程式存取金鑰，請事先產生及複製保存 Access Key ID 和 Secret access key
+CURRENT_HOME=$(pwd)                           # 設定家目錄為預設工作目錄的參數
+############################################################################
+# 清除前次執行所遺留的檔案   
+############################################################################
 rm -rf ~/.my-env
 rm -rf key.json
 rm -rf devops-hands-on
 
+############################################################################
+# 下載 Script 所需資源   
+############################################################################
 git clone https://github.com/abola/devops-hands-on.git
 
 ##########################
-### 執行的function
+### 逐步執行的function
 ##########################
 initialclientcloudshell
 installeks
@@ -49,7 +47,7 @@ echo "KeycloakPW=$keycloakpw" >> ~/.my-env
 cat <<EOF
 -------------------------------------------------------------
 環境安裝完成
-----------
+-------------------------------------------------------------
 Istio Bookinfo 示範程式: http://bookinfo.$INGRESS_HOST.nip.io/
 K8S Health Monitoring  : http://grafana.$INGRESS_HOST.nip.io/
 Kiali Service Graph    : http://kiali.$INGRESS_HOST.nip.io/
@@ -69,10 +67,10 @@ initialclientcloudshell(){
 # 安裝aws cli on GCP上的 cloudshell
 sudo apt-get -y install python3.6 python3-pip
 pip3 install awscli --upgrade --user
-echo "到AWS 的IAM 上取得帳號的 Access Key ID 和 Secret access key"
+echo "請到 AWS 的IAM 上取得帳號的 Access Key ID 和 Secret access key"
 
 # 確認使用者是否登入
-echo "輸入剛剛取得的 Access Key ID 和 Secret access key"
+echo "請於下列互動介面輸入剛剛取得 AWS 的 Access Key ID 和 Secret access key"
 aws configure
 }
 
@@ -91,7 +89,7 @@ Subnet01=$(aws ec2 describe-subnets --filters Name=tag:Name,Values=${VPC_STACK_N
 Subnet02=$(aws ec2 describe-subnets --filters Name=tag:Name,Values=${VPC_STACK_NAME}-Subnet02 |jq -r '.Subnets[].SubnetId')
 Subnet03=$(aws ec2 describe-subnets --filters Name=tag:Name,Values=${VPC_STACK_NAME}-Subnet03 |jq -r '.Subnets[].SubnetId')
 
-# AmazonEKSAdminRole IAM Role
+# 建立 IAM Role: AmazonEKSAdminRole
 aws iam create-role --role-name AmazonEKSAdminRole --assume-role-policy-document file://assume-role-policy.json
 aws iam attach-role-policy --role-name AmazonEKSAdminRole --policy-arn arn:aws:iam::aws:policy/AmazonEC2FullAccess
 aws iam attach-role-policy --role-name AmazonEKSAdminRole --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
@@ -101,8 +99,10 @@ iamrole=$(aws iam get-role --role-name AmazonEKSAdminRole --query 'Role.Arn' --o
 
 # 新增建立ec2的key-pair 請妥善保管登入worker node 可以用
 aws ec2 create-key-pair --key-name eksworkshop --query 'eksworkshop' --output text > $CURRENT_HOME/eksworkshop.pem
+echo "建立 ec2的key-pair 用於 ssh 登入 worker node，保存於 $CURRENT_HOME/eksworkshop.pem"
 
-# 部屬 EKS
+echo "正在安裝 kubectl 指令..."
+# 佈署 EKS
 REGION=$AWS_REGION EKS_ADMIN_ROLE=$iamrole VPC_ID=$vpcid SUBNET1=$Subnet01 SUBNET2=$Subnet02 SUBNET3=$Subnet03  make create-eks-cluster
 }
 
@@ -124,7 +124,7 @@ echo "ecr的 token 在 $CURRENT_HOME/.docker/config.json"
 
 # 安裝 kubectl 指令
 installKubectl() {
-  echo "正在安裝 kubectl 指令..."
+  echo "正在安裝 kubectl 套件中..."
   printf "  安裝 kubectl 套件中......"
   apt-get -y install kubectl > /dev/null 2>&1 && echo "完成"
 }
@@ -155,7 +155,7 @@ aws --region $AWS_REGION eks update-kubeconfig --name eksdemo --role-arn $iamrol
 installkeycloak(){
 helm install --name keycloak -f keycloak-values.yaml stable/keycloak
 # keycloakpw=$(kubectl get secret --namespace default keycloak-http -o jsonpath="{.data.password}" | base64 --decode)
-echo "帳號為 admin  密碼為 systex "
+echo "安裝 keycloak，帳號為 admin  密碼為 systex "
 }
 
 
