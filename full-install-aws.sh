@@ -8,11 +8,12 @@
 ############################################################################
 
 AWS_REGION=<輸入要在哪個region建立>              # AWS Region，例如 us-west-2
-AWS_ACCOUT_ID=<輸入自己的accout_id>             # root User ID，例如 348053640110
+AWS_ACCOUT_ID=<輸入自己的accout_id>              # root User ID，例如 348053640110
 iamuseraccount=<請變更自己的AWS上的IAM user>     # IAM 使用者名稱，例如 A506-Harry
 # 執行 Script 時會需要在 互動介面輸入 AWS 程式存取金鑰，請事先產生及複製保存 Access Key ID 和 Secret access key
-CURRENT_HOME=$(pwd)                           # 設定家目錄為預設工作目錄的參數
-VPC_STACK_NAME=<eks-service>                    # 輸入EKS的叢集名稱
+CURRENT_HOME=$(pwd)                              # 設定家目錄為預設工作目錄的參數
+VPC_STACK_NAME=<vpc-name>                        # 輸入VPC的名稱
+CLUSTER_STACK_NAME=<eksname>                     # 輸入eks的叢集名稱
 ##########################
 ### 逐步執行的function
 ##########################
@@ -31,7 +32,6 @@ installistio
 installEFK
 installKSM
 setupService
-#createhaproxy
 
 
 > ~/.my-env
@@ -91,7 +91,7 @@ echo "建立 ec2的key-pair 用於 ssh 登入 worker node，保存於 $CURRENT_H
 
 echo "正在安裝 kubectl 指令..."
 # 佈署 EKS
-REGION=$AWS_REGION EKS_ADMIN_ROLE=$iamrole VPC_ID=$vpcid SUBNET1=$Subnet01 SUBNET2=$Subnet02 SUBNET3=$Subnet03  make create-eks-cluster
+REGION=$AWS_REGION EKS_ADMIN_ROLE=$iamrole VPC_ID=$vpcid SUBNET1=$Subnet01 SUBNET2=$Subnet02 SUBNET3=$Subnet03 CLUSTER_STACK_NAME=$CLUSTER_STACK_NAME make create-eks-cluster
 }
 
 # 確認CloudFormation 狀態是否完成
@@ -386,11 +386,12 @@ rm -rf ~/.my-env
 rm -rf key.json
 
 createhaproxy(){
+cd $CURRENT_HOME/eks-templates
 ingressgateway=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.EXTERNAL-IP[0].ip})
 sed -i "s/ingressgateway/${ingressgateway}/g" Haproxy-create.yaml
 aws cloudformation create-stack  --stack-name  Haproxy-create --template-body file://Haproxy-create.yaml --region $AWS_REGION
 sleep 20
 }
-
+#######################################################
 
 main
