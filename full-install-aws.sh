@@ -104,30 +104,36 @@ done
 
 # 新建ECR
 createecr() {
-aws ecr create-repository --repository-name ecr --region $AWS_REGION
+# aws ecr create-repository --repository-name <名稱> --region $AWS_REGION
 $(aws ecr get-login --no-include-email --region $AWS_REGION)
 echo "ecr的 token 在 $CURRENT_HOME/.docker/config.json"
 echo "上傳必要images 到ACR上"
+ aws ecr create-repository --repository-name alertmanager --region $AWS_REGION > /dev/null 2>&1
  docker pull marketplace.gcr.io/google/prometheus/alertmanager:2.2 > /dev/null 2>&1
  docker tag  marketplace.gcr.io/google/prometheus/alertmanager:2.2 ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/alertmanager:2.2 > /dev/null 2>&1
  docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/alertmanager:2.2 > /dev/null 2>&1
  
+ aws ecr create-repository --repository-name prometheus --region $AWS_REGION > /dev/null 2>&1
  docker pull marketplace.gcr.io/google/prometheus:2.2 > /dev/null 2>&1
  docker tag  marketplace.gcr.io/google/prometheus:2.2 ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/prometheus:2.2 > /dev/null 2>&1
- docker push $Registryname.azurecr.io/prometheus:2.2 > /dev/null 2>&1
+ docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/prometheus:2.2 > /dev/null 2>&1
  
+ aws ecr create-repository --repository-name nodeexporter --region $AWS_REGION > /dev/null 2>&1
  docker pull marketplace.gcr.io/google/prometheus/nodeexporter:2.2 > /dev/null 2>&1
  docker tag  marketplace.gcr.io/google/prometheus/nodeexporter:2.2 ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nodeexporter:2.2 > /dev/null 2>&1
  docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nodeexporter:2.2 > /dev/null 2>&1
  
+ aws ecr create-repository --repository-name kubestatemetrics --region $AWS_REGION > /dev/null 2>&1
  docker pull marketplace.gcr.io/google/prometheus/kubestatemetrics:2.2 > /dev/null 2>&1
  docker tag  marketplace.gcr.io/google/prometheus/kubestatemetrics:2.2 ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/kubestatemetrics:2.2 > /dev/null 2>&1
  docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/kubestatemetrics:2.2 > /dev/null 2>&1
  
+ aws ecr create-repository --repository-name grafana --region $AWS_REGION > /dev/null 2>&1
  docker pull marketplace.gcr.io/google/prometheus/grafana:2.2 > /dev/null 2>&1
  docker tag  marketplace.gcr.io/google/prometheus/grafana:2.2 ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/grafana:2.2 > /dev/null 2>&1
  docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/grafana:2.2 > /dev/null 2>&1
  
+ aws ecr create-repository --repository-name debian9 --region $AWS_REGION > /dev/null 2>&1
  docker pull marketplace.gcr.io/google/prometheus/debian9:2.2 > /dev/null 2>&1
  docker tag  marketplace.gcr.io/google/prometheus/debian9:2.2 ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/debian9:2.2 > /dev/null 2>&1
  docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/debian9:2.2 > /dev/null 2>&1
