@@ -107,6 +107,31 @@ createecr() {
 aws ecr create-repository --repository-name ecr --region $AWS_REGION
 $(aws ecr get-login --no-include-email --region $AWS_REGION)
 echo "ecr的 token 在 $CURRENT_HOME/.docker/config.json"
+echo "上傳必要images 到ACR上"
+ docker pull marketplace.gcr.io/google/prometheus/alertmanager:2.2 > /dev/null 2>&1
+ docker tag  marketplace.gcr.io/google/prometheus/alertmanager:2.2 ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/alertmanager:2.2 > /dev/null 2>&1
+ docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/alertmanager:2.2 > /dev/null 2>&1
+ 
+ docker pull marketplace.gcr.io/google/prometheus:2.2 > /dev/null 2>&1
+ docker tag  marketplace.gcr.io/google/prometheus:2.2 ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/prometheus:2.2 > /dev/null 2>&1
+ docker push $Registryname.azurecr.io/prometheus:2.2 > /dev/null 2>&1
+ 
+ docker pull marketplace.gcr.io/google/prometheus/nodeexporter:2.2 > /dev/null 2>&1
+ docker tag  marketplace.gcr.io/google/prometheus/nodeexporter:2.2 ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nodeexporter:2.2 > /dev/null 2>&1
+ docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nodeexporter:2.2 > /dev/null 2>&1
+ 
+ docker pull marketplace.gcr.io/google/prometheus/kubestatemetrics:2.2 > /dev/null 2>&1
+ docker tag  marketplace.gcr.io/google/prometheus/kubestatemetrics:2.2 ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/kubestatemetrics:2.2 > /dev/null 2>&1
+ docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/kubestatemetrics:2.2 > /dev/null 2>&1
+ 
+ docker pull marketplace.gcr.io/google/prometheus/grafana:2.2 > /dev/null 2>&1
+ docker tag  marketplace.gcr.io/google/prometheus/grafana:2.2 ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/grafana:2.2 > /dev/null 2>&1
+ docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/grafana:2.2 > /dev/null 2>&1
+ 
+ docker pull marketplace.gcr.io/google/prometheus/debian9:2.2 > /dev/null 2>&1
+ docker tag  marketplace.gcr.io/google/prometheus/debian9:2.2 ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/debian9:2.2 > /dev/null 2>&1
+ docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/debian9:2.2 > /dev/null 2>&1
+ 
 }
 
 
@@ -351,14 +376,22 @@ installEFK() {
 }
 
 installKSM() {
-  cd $CURRENT_HOME
-
   echo "安裝 Kube-state-metrics ..."
   printf "  安裝中 ..."
   kubectl apply -f devops-hands-on/kube-state-metrics/app-crd.yaml > /dev/null 2>&1 
   kubectl apply -f devops-hands-on/kube-state-metrics/prometheus-metrics_sa_manifest.yaml --namespace logging > /dev/null 2>&1 
+  sed -i 's/prometheus:2.2/prometheus\/prometheus:2.2/g' devops-hands-on/kube-state-metrics/prometheus-metrics_manifest.yaml
+  sed -i 's/marketplace.gcr.io\/google\/prometheus/Registryname/g' devops-hands-on/kube-state-metrics/prometheus-metrics_manifest.yaml
+  sed -i "s@Registryname@${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com@g" devops-hands-on/kube-state-metrics/prometheus-metrics_manifest.yaml
   kubectl apply -f devops-hands-on/kube-state-metrics/prometheus-metrics_manifest.yaml --namespace logging  > /dev/null 2>&1 && echo "完成"
-
+  
+  # 讓 AKS 可以去ACR 拉images
+  kubectl patch serviceaccount prometheus-metrics-alertmanager -n logging -p '{"imagePullSecrets": [{"name": "acr-auth"}]}'
+  kubectl patch serviceaccount prometheus-metrics-grafana -n logging -p '{"imagePullSecrets": [{"name": "acr-auth"}]}'
+  kubectl patch serviceaccount prometheus-metrics-kube-state-metrics -n logging -p '{"imagePullSecrets": [{"name": "acr-auth"}]}'
+  kubectl patch serviceaccount prometheus-metrics-node-exporter  -n logging -p '{"imagePullSecrets": [{"name": "acr-auth"}]}'
+  kubectl patch serviceaccount prometheus-metrics-prometheus -n logging -p '{"imagePullSecrets": [{"name": "acr-auth"}]}'
+  kubectl patch serviceaccount default -n logging -p '{"imagePullSecrets": [{"name": "acr-auth"}]}'
 }
 
 
