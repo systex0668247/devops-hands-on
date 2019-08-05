@@ -83,6 +83,7 @@ aws iam attach-role-policy --role-name AmazonEKSAdminRole --policy-arn arn:aws:i
 aws iam attach-role-policy --role-name AmazonEKSAdminRole --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
 aws iam put-role-policy --role-name AmazonEKSAdminRole --policy-name EKSAdminExtraPolicies --policy-document file://eks-admin-iam-policy.json
 aws iam put-role-policy --role-name GetRoleallow --policy-name GetRoleallow --policy-document file://getroleallow.json
+sleep 5
 iamrole=$(aws iam get-role --role-name AmazonEKSAdminRole --query 'Role.Arn' --output text)
 
 # 新增建立ec2的key-pair 請妥善保管登入worker node 可以用
