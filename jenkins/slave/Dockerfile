@@ -3,6 +3,7 @@ FROM jenkins/jnlp-slave:alpine
 USER root
 ARG jenkine_ACCESS_KEY_ID
 ARG jenkine_SECRET_ACCESS_KEY
+
 ENV TZ="Asia/Taipei"
 
 RUN apk add curl wget \    
@@ -20,9 +21,9 @@ RUN apk add curl wget \
     && rm -rf /var/cache/apk/* \
     && rm -rf /tmp/*
 # creare aws service account SECRET_ACCESS in ~/.aws/credentials
-echo "[default]" > ~/.aws/credentials
-echo "aws_access_key_id = ${jenkine_ACCESS_KEY_ID}" >> ~/.aws/credentials
-echo "aws_secret_access_key = ${jenkine_SECRET_ACCESS_KEY}" >> ~/.aws/credentials
+RUN echo "[default]" > ~/.aws/credentials
+RUN echo "aws_access_key_id = ${jenkine_ACCESS_KEY_ID}" >> ~/.aws/credentials
+RUN echo "aws_secret_access_key = ${jenkine_SECRET_ACCESS_KEY}" >> ~/.aws/credentials
     
 WORKDIR /opt
 
