@@ -8,7 +8,7 @@
 ############################################################################
 
 AWS_REGION=<輸入要在哪個region建立>              # AWS Region，例如 us-west-2  https://docs.aws.amazon.com/zh_cn/AWSEC2/latest/UserGuide/using-regions-availability-zones.html
-AWS_ACCOUT_ID=<輸入自己的accout_id>              # root User ID，例如 348053640110
+AWS_ACCOUNT_ID=<輸入自己的accout_id>              # root User ID，例如 348053640110
 iamuseraccount=<請變更自己的AWS上的IAM user>     # IAM 使用者名稱，例如 A506-Harry
 # 執行 Script 時會需要在 互動介面輸入 AWS 程式存取金鑰，請事先產生及複製保存 Access Key ID 和 Secret access key
 CURRENT_HOME=$(pwd)                              # 設定家目錄為預設工作目錄的參數
@@ -96,7 +96,7 @@ REGION=$AWS_REGION EKS_ADMIN_ROLE=$iamrole VPC_ID=$vpcid SUBNET1=$Subnet01 SUBNE
 
 # 確認CloudFormation 狀態是否完成
 checkeksstatus() {
-while [ $(aws cloudformation describe-stacks --stack-name eksdemo |jq -r '.Stacks[].StackStatus') != 'CREATE_COMPLETE' ]
+while [ $(aws cloudformation describe-stacks --stack-name $CLUSTER_STACK_NAME |jq -r '.Stacks[].StackStatus') != 'CREATE_COMPLETE' ]
 do
    sleep 10
 done
@@ -160,7 +160,7 @@ updatekubectlconfigure() {
 cd $CURRENT_HOME/eks-templates
 # AmazonEKSAdminRole IAM Role
 iamrole=$(aws iam get-role --role-name AmazonEKSAdminRole --query 'Role.Arn' --output text)
-aws --region $AWS_REGION eks update-kubeconfig --name eksdemo --role-arn $iamrole
+aws --region $AWS_REGION eks update-kubeconfig --name $CLUSTER_STACK_NAME --role-arn $iamrole
 }
 
 
