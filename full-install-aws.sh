@@ -54,8 +54,8 @@ EOF
 
 initialclientcloudshell(){
 # 安裝aws cli on GCP上的 cloudshell
-sudo apt-get -y install python3.6 python3-pip
-pip3 install awscli --upgrade --user
+sudo apt-get -y install python3.6 python3-pip  > /dev/null 2>&1
+pip3 install awscli --upgrade --user  > /dev/null 2>&1
 echo "請到 AWS 的IAM 上取得帳號的 Access Key ID 和 Secret access key"
 
 # 確認使用者是否登入
