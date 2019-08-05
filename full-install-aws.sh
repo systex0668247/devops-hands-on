@@ -12,7 +12,7 @@ AWS_ACCOUT_ID=<輸入自己的accout_id>             # root User ID，例如 348
 iamuseraccount=<請變更自己的AWS上的IAM user>     # IAM 使用者名稱，例如 A506-Harry
 # 執行 Script 時會需要在 互動介面輸入 AWS 程式存取金鑰，請事先產生及複製保存 Access Key ID 和 Secret access key
 CURRENT_HOME=$(pwd)                           # 設定家目錄為預設工作目錄的參數
-
+VPC_STACK_NAME=<eks-service>                    # 輸入EKS的叢集名稱
 ##########################
 ### 逐步執行的function
 ##########################
@@ -70,7 +70,6 @@ cd $CURRENT_HOME
 git clone https://github.com/harryliu123/eks-templates
 cd eks-templates
 # 建立VPC
-export VPC_STACK_NAME=eks-service
 aws cloudformation create-stack  --stack-name ${VPC_STACK_NAME} --template-body file://eks-vpc.yaml --region $AWS_REGION
 sleep 20
 vpcid=$(aws ec2 describe-vpcs --filters Name=tag:Name,Values=${VPC_STACK_NAME}-VPC |jq -r  '.Vpcs[].VpcId')
