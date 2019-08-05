@@ -145,7 +145,7 @@ installKubectl() {
 # 執行更新IAM role
 updaterole(){
 cd $CURRENT_HOME/eks-templates
-sed -i "s/620154271401/${AWS_ACCOUT_ID}/g" assume-role-policy.json
+sed -i "s/620154271401/${AWS_ACCOUNT_ID}/g" assume-role-policy.json
 sed -i "s/harry-admin/${iamuseraccount}/g" assume-role-policy.json
 aws iam update-assume-role-policy --role-name AmazonEKSAdminRole --policy-document file://assume-role-policy.json
 }
@@ -319,7 +319,7 @@ cat <<'EOF' > docker-config.json
 EOF
 
 sed -i "s/region/${AWS_REGION}/g" docker-config.json
-sed -i "s/aws_account_id/${AWS_ACCOUT_ID}/g" docker-config.json
+sed -i "s/aws_account_id/${AWS_ACCOUNT_ID}/g" docker-config.json
 kubectl create configmap docker-registry-key --from-file=docker-config.json  > /dev/null 2>&1
 # kubectl create configmap google-container-key  --from-file=docker-config.json  > /dev/null 2>&1
 
