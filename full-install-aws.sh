@@ -14,7 +14,7 @@ iamuseraccount=<請變更自己的AWS上的IAM user>     # IAM 使用者名稱�
 CURRENT_HOME=$(pwd)                              # 設定家目錄為預設工作目錄的參數
 VPC_STACK_NAME=<vpc-name>                        # 輸入VPC的名稱
 CLUSTER_STACK_NAME=<eksname>                     # 輸入eks的叢集名稱
-SSH_KEY_NAME=eksworkshopsshkey                   # 因為要建立EC2給EKS使用必須要新建一組ssh key: $SSH_KEY_NAME.pem
+SSH_KEY_NAME=eksworkshopsshkey                   # 因為要建立EC2給EKS使用必須要新建一組ssh key: $SSH_KEY_NAME.pem 在跟目錄上
 ##########################
 ### 逐步執行的function
 ##########################
