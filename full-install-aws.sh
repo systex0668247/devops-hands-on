@@ -6,15 +6,29 @@
 ############################################################################
 # 填寫必要變數   
 ############################################################################
+# AWS Region，例如 us-west-2  https://docs.aws.amazon.com/zh_cn/AWSEC2/latest/UserGuide/using-regions-availability-zones.html
+AWS_REGION=<輸入要在哪個region建立>
 
-AWS_REGION=<輸入要在哪個region建立>              # AWS Region，例如 us-west-2  https://docs.aws.amazon.com/zh_cn/AWSEC2/latest/UserGuide/using-regions-availability-zones.html
-AWS_ACCOUNT_ID=<輸入自己的accout_id>              # root User ID，例如 348053640110
-iamuseraccount=<請變更自己的AWS上的IAM user>     # IAM 使用者名稱，例如 A506-Harry
+# root User ID，例如 348053640110
+AWS_ACCOUNT_ID=<輸入自己的accout_id>
+
+# IAM 使用者名稱，例如 A506-Harry
 # 執行 Script 時會需要在 互動介面輸入 AWS 程式存取金鑰，請事先產生及複製保存 Access Key ID 和 Secret access key
-CURRENT_HOME=$(pwd)                              # 設定家目錄為預設工作目錄的參數
-VPC_STACK_NAME=<vpc-name>                        # 輸入VPC的名稱
-CLUSTER_STACK_NAME=<eksname>                     # 輸入eks的叢集名稱
-SSH_KEY_NAME=eksworkshopsshkey                   # 因為要建立EC2給EKS使用必須要新建一組ssh key: $SSH_KEY_NAME.pem 私鑰會存放在根目錄上
+iamuseraccount=<請變更自己的AWS上的IAM user>
+
+# 設定家目錄為預設工作目錄的參數
+CURRENT_HOME=$(pwd)
+
+# 輸入VPC的名稱
+VPC_STACK_NAME=<vpc-name>
+
+# 輸入eks的叢集名稱
+CLUSTER_STACK_NAME=<eksname>
+
+# 因為要建立EC2給EKS使用必須要新建一組ssh key: $SSH_KEY_NAME.pem
+SSH_KEY_NAME=eksworkshopsshkey
+
+
 ##########################
 ### 逐步執行的function
 ##########################
@@ -72,7 +86,7 @@ git clone https://github.com/harryliu123/eks-templates
 cd eks-templates
 # 建立VPC
 aws cloudformation create-stack  --stack-name ${VPC_STACK_NAME} --template-body file://eks-vpc.yaml --region $AWS_REGION
-sleep 20
+sleep 30
 vpcid=$(aws ec2 describe-vpcs --filters Name=tag:Name,Values=${VPC_STACK_NAME}-VPC |jq -r  '.Vpcs[].VpcId')
 Subnet01=$(aws ec2 describe-subnets --filters Name=tag:Name,Values=${VPC_STACK_NAME}-Subnet01 |jq -r '.Subnets[].SubnetId')
 Subnet02=$(aws ec2 describe-subnets --filters Name=tag:Name,Values=${VPC_STACK_NAME}-Subnet02 |jq -r '.Subnets[].SubnetId')
@@ -84,7 +98,7 @@ aws iam attach-role-policy --role-name AmazonEKSAdminRole --policy-arn arn:aws:i
 aws iam attach-role-policy --role-name AmazonEKSAdminRole --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
 aws iam put-role-policy --role-name AmazonEKSAdminRole --policy-name EKSAdminExtraPolicies --policy-document file://eks-admin-iam-policy.json
 aws iam put-role-policy --role-name GetRoleallow --policy-name GetRoleallow --policy-document file://getroleallow.json
-sleep 5
+sleep 10
 iamrole=$(aws iam get-role --role-name AmazonEKSAdminRole --query 'Role.Arn' --output text)
 
 # 新增建立ec2的key-pair 請妥善保管登入worker node 可以用
@@ -93,7 +107,7 @@ echo "建立 ec2的key-pair 用於 ssh 登入 worker node，保存於 $CURRENT_H
 
 echo "正在安裝 kubectl 指令..."
 # 佈署 EKS
-REGION=$AWS_REGION EKS_ADMIN_ROLE=$iamrole VPC_ID=$vpcid SUBNET1=$Subnet01 SUBNET2=$Subnet02 SUBNET3=$Subnet03 CLUSTER_STACK_NAME=$CLUSTER_STACK_NAME SSH_KEY_NAME=$SSH_KEY_NAME make create-eks-cluster
+AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID REGION=$AWS_REGION EKS_ADMIN_ROLE=$iamrole VPC_ID=$vpcid SUBNET1=$Subnet01 SUBNET2=$Subnet02 SUBNET3=$Subnet03 CLUSTER_STACK_NAME=$CLUSTER_STACK_NAME SSH_KEY_NAME=$SSH_KEY_NAME make create-eks-cluster
 }
 
 # 確認CloudFormation 狀態是否完成
