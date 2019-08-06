@@ -264,11 +264,13 @@ EOF
 
 
 InstallEcrJenkins(){
-cd  $CURRENT_HOME/devops-hands-on
+cd  $CURRENT_HOME
 # ECR & jenkins
  # 建立IAM User 
   aws iam create-user --user-name jenkine-ecr
   
+  #刪除最近一筆新增的access-key :AccessKeyMetadata[1].AccessKeyId , 只有兩筆第一筆為AccessKeyMetadata[].AccessKeyId
+  aws iam delete-access-key --access-key $(aws iam list-access-keys --user-name jenkine-ecr |jq -r '.AccessKeyMetadata[1].AccessKeyId') --user-name jenkine-ecr
   new_key=$(aws iam create-access-key --user-name jenkine-ecr  | jq -e -r .AccessKey)
   jenkine_ACCESS_KEY_ID=$(printf "%s" $new_key | jq -e -r .AccessKeyId)
   jenkine_SECRET_ACCESS_KEY=$(printf "%s" $new_key | jq -e -r .SecretAccessKey)
@@ -330,6 +332,7 @@ aws iam put-role-policy --role-name jenkins-ecr-assumerole --policy-name jenkins
 echo "[default]" > awscredentials_jenkins
 echo "aws_access_key_id = $jenkine_ACCESS_KEY_ID" >> awscredentials_jenkins
 echo "aws_secret_access_key = $jenkine_SECRET_ACCESS_KEY" >> awscredentials_jenkins
+# 在Dockerfile做掉 所以不用 create configmap
 # kubectl create configmap aws-iam-jenkine-ecr-key --from-file=awscredentials_jenkins  > /dev/null 2>&1
 
 
