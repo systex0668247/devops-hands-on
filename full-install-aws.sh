@@ -14,6 +14,7 @@ iamuseraccount=<請變更自己的AWS上的IAM user>     # IAM 使用者名稱�
 CURRENT_HOME=$(pwd)                              # 設定家目錄為預設工作目錄的參數
 VPC_STACK_NAME=<vpc-name>                        # 輸入VPC的名稱
 CLUSTER_STACK_NAME=<eksname>                     # 輸入eks的叢集名稱
+SSH_KEY_NAME=eksworkshopsshkey                   # 因為要建立EC2給EKS使用必須要新建一組ssh key: $SSH_KEY_NAME.pem
 ##########################
 ### 逐步執行的function
 ##########################
@@ -87,12 +88,12 @@ sleep 5
 iamrole=$(aws iam get-role --role-name AmazonEKSAdminRole --query 'Role.Arn' --output text)
 
 # 新增建立ec2的key-pair 請妥善保管登入worker node 可以用
-aws ec2 create-key-pair --key-name eksworkshop --query 'eksworkshop' --output text > $CURRENT_HOME/eksworkshop.pem
-echo "建立 ec2的key-pair 用於 ssh 登入 worker node，保存於 $CURRENT_HOME/eksworkshop.pem"
+aws ec2 create-key-pair --key-name $SSH_KEY_NAME --query 'KeyMaterial' --output text > $CURRENT_HOME/$SSH_KEY_NAME.pem
+echo "建立 ec2的key-pair 用於 ssh 登入 worker node，保存於 $CURRENT_HOME/$SSH_KEY_NAME.pem"
 
 echo "正在安裝 kubectl 指令..."
 # 佈署 EKS
-REGION=$AWS_REGION EKS_ADMIN_ROLE=$iamrole VPC_ID=$vpcid SUBNET1=$Subnet01 SUBNET2=$Subnet02 SUBNET3=$Subnet03 CLUSTER_STACK_NAME=$CLUSTER_STACK_NAME make create-eks-cluster
+REGION=$AWS_REGION EKS_ADMIN_ROLE=$iamrole VPC_ID=$vpcid SUBNET1=$Subnet01 SUBNET2=$Subnet02 SUBNET3=$Subnet03 CLUSTER_STACK_NAME=$CLUSTER_STACK_NAME SSH_KEY_NAME=$SSH_KEY_NAME make create-eks-cluster
 }
 
 # 確認CloudFormation 狀態是否完成
