@@ -7,6 +7,7 @@
 # 填寫必要變數   
 ############################################################################
 # AWS Region，例如 us-west-2  https://docs.aws.amazon.com/zh_cn/AWSEC2/latest/UserGuide/using-regions-availability-zones.html
+# 如果要建立兩座請分別建立在不同的region
 AWS_REGION=<輸入要在哪個region建立>
 
 # root User ID，例如 348053640110
