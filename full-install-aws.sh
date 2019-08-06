@@ -189,7 +189,8 @@ aws --region $AWS_REGION eks update-kubeconfig --name $CLUSTER_STACK_NAME --role
 
 
 installkeycloak(){
-helm install --name keycloak -f keycloak-values.yaml stable/keycloak
+cd  $CURRENT_HOME/eks-templates
+helm install --name keycloak -f keycloak-values.yaml stable/keycloak  > /dev/null 2>&1
 # keycloakpw=$(kubectl get secret --namespace default keycloak-http -o jsonpath="{.data.password}" | base64 --decode)
 echo "安裝 keycloak，帳號為 admin  密碼為 systex "
 }
@@ -263,7 +264,7 @@ EOF
 
 
 InstallEcrJenkins(){
-
+cd  $CURRENT_HOME/devops-hands-on
 # ECR & jenkins
  # 建立IAM User 
   aws iam create-user --user-name jenkine-ecr
