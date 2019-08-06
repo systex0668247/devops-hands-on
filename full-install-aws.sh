@@ -116,10 +116,12 @@ while [ $(aws cloudformation describe-stacks --stack-name $CLUSTER_STACK_NAME |j
 do
    sleep 10
 done
+echo "已完成EKS...."
 }
 
 # 新建ECR
 createecr() {
+echo "建立ECR"
 # aws ecr create-repository --repository-name <名稱> --region $AWS_REGION
 $(aws ecr get-login --no-include-email --region $AWS_REGION)
 echo "ecr的 token 在 $CURRENT_HOME/.docker/config.json"
