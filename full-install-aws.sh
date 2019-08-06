@@ -98,14 +98,14 @@ aws iam attach-role-policy --role-name AmazonEKSAdminRole --policy-arn arn:aws:i
 aws iam attach-role-policy --role-name AmazonEKSAdminRole --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
 aws iam put-role-policy --role-name AmazonEKSAdminRole --policy-name EKSAdminExtraPolicies --policy-document file://eks-admin-iam-policy.json
 aws iam put-role-policy --role-name GetRoleallow --policy-name GetRoleallow --policy-document file://getroleallow.json
-sleep 10
+sleep 20
 iamrole=$(aws iam get-role --role-name AmazonEKSAdminRole --query 'Role.Arn' --output text)
 
 # 新增建立ec2的key-pair 請妥善保管登入worker node 可以用
 aws ec2 create-key-pair --key-name $SSH_KEY_NAME --query 'KeyMaterial' --output text > $CURRENT_HOME/$SSH_KEY_NAME.pem
 echo "建立 ec2的key-pair 用於 ssh 登入 worker node，保存於 $CURRENT_HOME/$SSH_KEY_NAME.pem"
 
-echo "正在安裝 kubectl 指令..."
+echo "正在安裝 EKS ..."
 # 佈署 EKS
 AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID REGION=$AWS_REGION EKS_ADMIN_ROLE=$iamrole VPC_ID=$vpcid SUBNET1=$Subnet01 SUBNET2=$Subnet02 SUBNET3=$Subnet03 CLUSTER_STACK_NAME=$CLUSTER_STACK_NAME SSH_KEY_NAME=$SSH_KEY_NAME make create-eks-cluster
 }
