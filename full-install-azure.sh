@@ -6,8 +6,9 @@
 # 刪除所有資源請執行  bash <(curl -L https://raw.githubusercontent.com/harryliu123/devops-hands-on/master/full-install-azure.sh) delete 
 # 2019/7/31 建立完成  每日產生 700元台幣費用
 #######################################################
-Randomvar=$(cat /proc/sys/kernel/random/uuid | cut -b -6)
+Randomvar=(awk -v min=100000 -v max=999999 'BEGIN{srand(); print int(min+rand()*(max-min+1))}')
 Random=$Randomvar
+echo "Random=$Randomvar" >> ~/.my-env
 
 #######################################################
 ## 請修改下面參數
@@ -87,6 +88,10 @@ echo "REGION="$REGION
 echo "myResourceGroup="$myResourceGroup
 echo "myAKSClustername="$myAKSClustername
 echo "Registryname="$Registryname
+echo "REGION="$REGION >> ~/.my-env
+echo "myResourceGroup="$myResourceGroup >> ~/.my-env
+echo "myAKSClustername="$myAKSClustername >> ~/.my-env
+echo "Registryname="$Registryname >> ~/.my-env
 
 #  建立AKS 和一個預設的node
 echo "正在建立AKS以及第三個linux worknode...等待約7~10分鐘"
